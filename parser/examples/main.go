@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	"github.com/taki-mekhalfa/golox/ast"
 	"github.com/taki-mekhalfa/golox/parser"
 	"github.com/taki-mekhalfa/golox/scanner"
+	"github.com/taki-mekhalfa/golox/visitor"
 )
 
 func main() {
@@ -27,7 +27,7 @@ func main() {
 
 	expr, err := parser.Parse()
 	if err == nil {
-		printer := ast.AstPrinter{}
+		printer := visitor.PrettyPrinter{}
 		fmt.Println(printer.Print(expr))
 	}
 

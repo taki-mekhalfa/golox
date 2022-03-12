@@ -5,6 +5,7 @@ import (
 
 	. "github.com/taki-mekhalfa/golox/ast"
 	"github.com/taki-mekhalfa/golox/token"
+	"github.com/taki-mekhalfa/golox/visitor"
 )
 
 func main() {
@@ -19,6 +20,6 @@ func main() {
 		},
 	}
 
-	printer := AstPrinter{}
+	printer := visitor.PrettyPrinter{}
 	fmt.Println(printer.Print(expr))
 }
