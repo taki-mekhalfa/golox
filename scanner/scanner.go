@@ -114,6 +114,8 @@ func (s *Scanner) Scan() {
 			}
 		}
 	}
+
+	s.tokens = append(s.tokens, token.Token{Type: token.EOF, Lexeme: "", Line: s.line})
 }
 
 func (s *Scanner) appendToken(typ token.Type) {
