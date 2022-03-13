@@ -3,23 +3,41 @@ package main
 import (
 	"fmt"
 
-	. "github.com/taki-mekhalfa/golox/ast"
-	"github.com/taki-mekhalfa/golox/token"
+	"github.com/taki-mekhalfa/golox/parser"
+	"github.com/taki-mekhalfa/golox/scanner"
 	"github.com/taki-mekhalfa/golox/visitor"
 )
 
 func main() {
-	expr := &Binary{
-		Left: &Unary{
-			Operator: token.Token{Type: token.MINUS, Lexeme: "-", Line: 1},
-			Expr:     &Literal{Value: 123},
-		},
-		Operator: token.Token{Type: token.STAR, Lexeme: "*", Line: 1},
-		Right: &Grouping{
-			Expr: &Literal{Value: 45.67},
-		},
+	errFunc := func(line int, errMessage string) {
+		fmt.Printf("[line %d] Error: %s\n", line, errMessage)
 	}
 
-	printer := visitor.PrettyPrinter{}
-	fmt.Println(printer.Print(expr))
+	runtimeErrFunc := func(line int, errMessage string) {
+		fmt.Printf("[line %d] Runtime Error: %s\n", line, errMessage)
+	}
+
+	scanner := scanner.Scanner{Error: errFunc}
+
+	src := `2 * (3/-"muffin")`
+
+	scanner.Init(src)
+	scanner.Scan()
+
+	fmt.Println(scanner.Tokens())
+
+	parser := parser.Parser{Error: errFunc}
+	parser.Init(scanner.Tokens())
+
+	expr, err := parser.Parse()
+	if err == nil {
+		printer := visitor.PrettyPrinter{}
+		fmt.Println(printer.Print(expr))
+	}
+
+	interpreter := visitor.Interpreter{Error: runtimeErrFunc}
+	result := interpreter.Interpret(expr)
+	if interpreter.ErrorCount == 0 {
+		fmt.Println(result)
+	}
 }
