@@ -41,6 +41,18 @@ func (p PrettyPrinter) VisitUnary(u *Unary) interface{} {
 	return p.parenthesize(u.Operator.Lexeme, u.Expr)
 }
 
-func (p PrettyPrinter) Print(expr Expr) string {
+func (p PrettyPrinter) VisitPrint(printStmt *Print) interface{} {
+	return fmt.Sprint("PRINT ", p.PrintExpr(printStmt.Expr))
+}
+
+func (p PrettyPrinter) VisitExprStmt(exprStmt *ExprStmt) interface{} {
+	return p.PrintExpr(exprStmt.Expr)
+}
+
+func (p PrettyPrinter) PrintExpr(expr Expr) string {
 	return expr.Accept(p).(string)
+}
+
+func (p PrettyPrinter) PrintStmt(stmt Stmt) string {
+	return stmt.Accept(p).(string)
 }
