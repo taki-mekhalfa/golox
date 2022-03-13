@@ -13,7 +13,12 @@ func main() {
 		fmt.Printf("[line %d] Error: %s\n", line, errMessage)
 	}}
 
-	src := `4 * 6 / (2+1) + (2) `
+	src := `
+		print 1 + 1;
+		print "ok";
+		print "ok" + "boki";
+		1 + (2/3);
+	`
 
 	scanner.Init(src)
 	scanner.Scan()
@@ -25,10 +30,12 @@ func main() {
 	}}
 	parser.Init(scanner.Tokens())
 
-	expr := parser.Parse()
+	stmts := parser.Parse()
 	if parser.ErrorCount == 0 {
 		printer := visitor.PrettyPrinter{}
-		fmt.Println(printer.Print(expr))
+		for _, stmt := range stmts {
+			fmt.Println(printer.PrintStmt(stmt))
+		}
 	}
 
 }

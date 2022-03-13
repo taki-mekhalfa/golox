@@ -15,19 +15,59 @@ type Parser struct {
 	ErrorCount int
 
 	current int
+
+	stmts []ast.Stmt
 }
 
 func (p *Parser) Init(src []token.Token) {
 	p.src = src
 }
 
-func (p *Parser) Parse() ast.Expr {
-	expr, _ := p.expression()
-	if !p.isAtEnd() {
-		p.reportError(p.peek().Line, fmt.Sprintf("unexpected %s, expecting EOF", p.peek().Lexeme))
-		return nil
+func (p *Parser) Parse() []ast.Stmt {
+	for !p.isAtEnd() {
+		stmt, _ := p.statement()
+		p.stmts = append(p.stmts, stmt)
 	}
-	return expr
+	// expr, _ := p.expression()
+	// if !p.isAtEnd() {
+	// 	p.reportError(p.peek().Line, fmt.Sprintf("unexpected %s, expecting EOF", p.peek().Lexeme))
+	// 	return nil
+	// }
+	return p.stmts
+}
+
+func (p *Parser) statement() (ast.Stmt, error) {
+	if p.match(token.PRINT) {
+		return p.printStmt()
+	}
+
+	return p.expressionStmt()
+}
+
+func (p *Parser) printStmt() (ast.Stmt, error) {
+	expr, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+	if p.peek().Type != token.SEMICOLON {
+		p.reportError(p.peek().Line, "Expected ; after expression.")
+		return nil, fmt.Errorf("line %d: expected ; after expression", p.peek().Line)
+	}
+	p.next()
+	return &ast.Print{Expr: expr}, nil
+}
+
+func (p *Parser) expressionStmt() (ast.Stmt, error) {
+	expr, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+	if p.peek().Type != token.SEMICOLON {
+		p.reportError(p.peek().Line, "Expected ; after expression.")
+		return nil, fmt.Errorf("line %d: expected ; after expression", p.peek().Line)
+	}
+	p.next()
+	return &ast.ExprStmt{Expr: expr}, nil
 }
 
 func (p *Parser) expression() (ast.Expr, error) {
