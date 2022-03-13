@@ -25,8 +25,8 @@ func main() {
 	}}
 	parser.Init(scanner.Tokens())
 
-	expr, err := parser.Parse()
-	if err == nil {
+	expr := parser.Parse()
+	if parser.ErrorCount == 0 {
 		printer := visitor.PrettyPrinter{}
 		fmt.Println(printer.Print(expr))
 	}

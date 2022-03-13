@@ -29,15 +29,14 @@ func main() {
 	parser := parser.Parser{Error: errFunc}
 	parser.Init(scanner.Tokens())
 
-	expr, err := parser.Parse()
-	if err == nil {
+	expr := parser.Parse()
+	if parser.ErrorCount == 0 {
 		printer := visitor.PrettyPrinter{}
 		fmt.Println(printer.Print(expr))
-	}
-
-	interpreter := visitor.Interpreter{Error: runtimeErrFunc}
-	result := interpreter.Interpret(expr)
-	if interpreter.ErrorCount == 0 {
-		fmt.Println(result)
+		interpreter := visitor.Interpreter{Error: runtimeErrFunc}
+		result := interpreter.Interpret(expr)
+		if interpreter.ErrorCount == 0 {
+			fmt.Println(result)
+		}
 	}
 }

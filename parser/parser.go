@@ -21,8 +21,13 @@ func (p *Parser) Init(src []token.Token) {
 	p.src = src
 }
 
-func (p *Parser) Parse() (ast.Expr, error) {
-	return p.expression()
+func (p *Parser) Parse() ast.Expr {
+	expr, _ := p.expression()
+	if !p.isAtEnd() {
+		p.reportError(p.peek().Line, fmt.Sprintf("unexpected %s, expecting EOF", p.peek().Lexeme))
+		return nil
+	}
+	return expr
 }
 
 func (p *Parser) expression() (ast.Expr, error) {
