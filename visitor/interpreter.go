@@ -17,6 +17,18 @@ type Interpreter struct {
 	ErrorCount int
 }
 
+func (p *Interpreter) VisitExprStmt(es *ExprStmt) interface{} {
+	_ = p.Evaluate(es.Expr)
+
+	return nil
+}
+
+func (p *Interpreter) VisitPrint(printExpr *Print) interface{} {
+	fmt.Println(fmt.Sprint(p.Evaluate(printExpr.Expr)))
+
+	return nil
+}
+
 func (p *Interpreter) VisitBinary(b *Binary) interface{} {
 	left, right := b.Left.Accept(p), b.Right.Accept(p)
 
@@ -139,7 +151,11 @@ func checkIsNotZero(t token.Token, n float64) {
 	})
 }
 
-func (p *Interpreter) Interpret(expr Expr) string {
+func (p *Interpreter) Evaluate(expr Expr) interface{} {
+	return expr.Accept(p)
+}
+
+func (p *Interpreter) Interpret(stmts []Stmt) {
 	defer func() {
 		err := recover()
 		if err == nil {
@@ -152,7 +168,10 @@ func (p *Interpreter) Interpret(expr Expr) string {
 		}
 		panic(err)
 	}()
-	return fmt.Sprint(expr.Accept(p))
+
+	for _, stmt := range stmts {
+		stmt.Accept(p)
+	}
 }
 
 func (p *Interpreter) ResetErrors() {
