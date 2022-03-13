@@ -3,7 +3,7 @@ package ast
 import "github.com/taki-mekhalfa/golox/token"
 
 type Expr interface {
-	Accept(Visitor) interface{}
+	Accept(VisitorExpr) interface{}
 }
 
 type Binary struct {
@@ -12,7 +12,7 @@ type Binary struct {
 	Right    Expr
 }
 
-func (b *Binary) Accept(v Visitor) interface{} {
+func (b *Binary) Accept(v VisitorExpr) interface{} {
 	return v.VisitBinary(b)
 }
 
@@ -20,7 +20,7 @@ type Grouping struct {
 	Expr Expr
 }
 
-func (g *Grouping) Accept(v Visitor) interface{} {
+func (g *Grouping) Accept(v VisitorExpr) interface{} {
 	return v.VisitGrouping(g)
 }
 
@@ -28,7 +28,7 @@ type Literal struct {
 	Value interface{}
 }
 
-func (l *Literal) Accept(v Visitor) interface{} {
+func (l *Literal) Accept(v VisitorExpr) interface{} {
 	return v.VisitLiteral(l)
 }
 
@@ -37,6 +37,6 @@ type Unary struct {
 	Expr     Expr
 }
 
-func (u *Unary) Accept(v Visitor) interface{} {
+func (u *Unary) Accept(v VisitorExpr) interface{} {
 	return v.VisitUnary(u)
 }

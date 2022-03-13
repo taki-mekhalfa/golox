@@ -1,8 +1,13 @@
 package ast
 
-type Visitor interface {
+type VisitorExpr interface {
 	VisitBinary(*Binary) interface{}
 	VisitGrouping(*Grouping) interface{}
 	VisitLiteral(*Literal) interface{}
 	VisitUnary(*Unary) interface{}
+}
+
+type VisitorStmt interface {
+	VisitPrint(*Print) interface{}
+	VisitExprStmt(*ExprStmt) interface{}
 }
