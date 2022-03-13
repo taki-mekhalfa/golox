@@ -34,15 +34,12 @@ func run(code string) {
 	parser := parser.Parser{Error: syntaxErrFunc}
 	parser.Init(scanner.Tokens())
 
-	expr := parser.Parse()
+	stmts := parser.Parse()
 	if parser.ErrorCount != 0 {
 		return
 	}
 
-	result := interpreter.Interpret(expr)
-	if interpreter.ErrorCount == 0 {
-		fmt.Println(result)
-	}
+	interpreter.Interpret(stmts)
 }
 
 func runPrompt() {
