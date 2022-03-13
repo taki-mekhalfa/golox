@@ -17,7 +17,7 @@ type Interpreter struct {
 	ErrorCount int
 }
 
-func (p Interpreter) VisitBinary(b *Binary) interface{} {
+func (p *Interpreter) VisitBinary(b *Binary) interface{} {
 	left, right := b.Left.Accept(p), b.Right.Accept(p)
 
 	switch b.Operator.Type {
@@ -60,15 +60,15 @@ func (p Interpreter) VisitBinary(b *Binary) interface{} {
 	return nil
 }
 
-func (p Interpreter) VisitGrouping(g *Grouping) interface{} {
+func (p *Interpreter) VisitGrouping(g *Grouping) interface{} {
 	return g.Expr.Accept(p)
 }
 
-func (p Interpreter) VisitLiteral(l *Literal) interface{} {
+func (p *Interpreter) VisitLiteral(l *Literal) interface{} {
 	return l.Value
 }
 
-func (p Interpreter) VisitUnary(u *Unary) interface{} {
+func (p *Interpreter) VisitUnary(u *Unary) interface{} {
 	v := u.Expr.Accept(p)
 	switch u.Operator.Type {
 	case token.BANG:
@@ -139,7 +139,7 @@ func checkIsNotZero(t token.Token, n float64) {
 	})
 }
 
-func (p Interpreter) Interpret(expr Expr) string {
+func (p *Interpreter) Interpret(expr Expr) string {
 	defer func() {
 		err := recover()
 		if err == nil {
@@ -153,4 +153,8 @@ func (p Interpreter) Interpret(expr Expr) string {
 		panic(err)
 	}()
 	return fmt.Sprint(expr.Accept(p))
+}
+
+func (p *Interpreter) ResetErrors() {
+	p.ErrorCount = 0
 }
