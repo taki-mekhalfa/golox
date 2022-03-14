@@ -29,6 +29,13 @@ func (e *environment) get(name string) (interface{}, bool) {
 type Interpreter struct {
 	Error      func(line int, errMessage string)
 	ErrorCount int
+	env        *environment
+}
+
+func (p *Interpreter) Init() {
+	p.env = &environment{
+		values: map[string]interface{}{},
+	}
 }
 
 func (p *Interpreter) VisitExprStmt(es *ExprStmt) interface{} {
@@ -39,6 +46,16 @@ func (p *Interpreter) VisitExprStmt(es *ExprStmt) interface{} {
 
 func (p *Interpreter) VisitPrint(printExpr *Print) interface{} {
 	fmt.Println(fmt.Sprint(p.Evaluate(printExpr.Expr)))
+
+	return nil
+}
+
+func (p *Interpreter) VisitVarStmt(var_ *VarStmt) interface{} {
+	if var_.Initializer == nil {
+		p.env.define(var_.Name, nil)
+	} else {
+		p.env.define(var_.Name, var_.Initializer.Accept(p))
+	}
 
 	return nil
 }
@@ -88,6 +105,18 @@ func (p *Interpreter) VisitBinary(b *Binary) interface{} {
 
 func (p *Interpreter) VisitGrouping(g *Grouping) interface{} {
 	return g.Expr.Accept(p)
+}
+
+func (p *Interpreter) VisitVar(var_ *Var) interface{} {
+	v, defined := p.env.get(var_.Token.Lexeme)
+	if !defined {
+		panic(runtimeError{
+			token: var_.Token,
+			msg:   fmt.Sprintf("Undefined variable '" + var_.Token.Lexeme + "'."),
+		})
+	}
+
+	return v
 }
 
 func (p *Interpreter) VisitLiteral(l *Literal) interface{} {
