@@ -37,6 +37,10 @@ func (p PrettyPrinter) VisitLiteral(l *Literal) interface{} {
 	return fmt.Sprint(l.Value)
 }
 
+func (p PrettyPrinter) VisitVar(var_ *Var) interface{} {
+	return fmt.Sprintf("var[%s]", var_.Token.Lexeme)
+}
+
 func (p PrettyPrinter) VisitUnary(u *Unary) interface{} {
 	return p.parenthesize(u.Operator.Lexeme, u.Expr)
 }
@@ -47,6 +51,14 @@ func (p PrettyPrinter) VisitPrint(printStmt *Print) interface{} {
 
 func (p PrettyPrinter) VisitExprStmt(exprStmt *ExprStmt) interface{} {
 	return p.PrintExpr(exprStmt.Expr)
+}
+
+func (p PrettyPrinter) VisitVarStmt(var_ *VarStmt) interface{} {
+	if var_.Initializer == nil {
+		return fmt.Sprintf("var %s", var_.Name)
+	}
+
+	return fmt.Sprintf("var %s = %s", var_.Name, var_.Initializer.Accept(p))
 }
 
 func (p PrettyPrinter) PrintExpr(expr Expr) string {
