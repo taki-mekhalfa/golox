@@ -63,6 +63,8 @@ func main() {
 		os.Exit(EX_USAGE)
 	}
 
+	interpreter.Init()
+
 	if len(os.Args) == 2 {
 		// TODO
 
