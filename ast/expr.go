@@ -40,3 +40,11 @@ type Unary struct {
 func (u *Unary) Accept(v VisitorExpr) interface{} {
 	return v.VisitUnary(u)
 }
+
+type Var struct {
+	Token token.Token
+}
+
+func (var_ *Var) Accept(v VisitorExpr) interface{} {
+	return v.VisitVar(var_)
+}

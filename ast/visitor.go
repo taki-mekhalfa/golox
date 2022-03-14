@@ -5,9 +5,11 @@ type VisitorExpr interface {
 	VisitGrouping(*Grouping) interface{}
 	VisitLiteral(*Literal) interface{}
 	VisitUnary(*Unary) interface{}
+	VisitVar(*Var) interface{}
 }
 
 type VisitorStmt interface {
 	VisitPrint(*Print) interface{}
 	VisitExprStmt(*ExprStmt) interface{}
+	VisitVarStmt(*VarStmt) interface{}
 }

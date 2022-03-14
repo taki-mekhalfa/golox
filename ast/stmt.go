@@ -19,3 +19,12 @@ type ExprStmt struct {
 func (es *ExprStmt) Accept(v VisitorStmt) interface{} {
 	return v.VisitExprStmt(es)
 }
+
+type VarStmt struct {
+	Name        string
+	Initializer Expr
+}
+
+func (var_ *VarStmt) Accept(v VisitorStmt) interface{} {
+	return v.VisitVarStmt(var_)
+}
