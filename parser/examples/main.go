@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/taki-mekhalfa/golox/parser"
+	"github.com/taki-mekhalfa/golox/printer"
 	"github.com/taki-mekhalfa/golox/scanner"
-	"github.com/taki-mekhalfa/golox/visitor"
 )
 
 func main() {
@@ -30,7 +30,7 @@ func main() {
 
 	stmts := parser.Parse()
 	if parser.ErrorCount == 0 {
-		printer := visitor.PrettyPrinter{}
+		printer := printer.PrettyPrinter{}
 		for _, stmt := range stmts {
 			fmt.Println(printer.PrintStmt(stmt))
 		}

@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/taki-mekhalfa/golox/interpreter"
 	"github.com/taki-mekhalfa/golox/parser"
 	"github.com/taki-mekhalfa/golox/scanner"
-	"github.com/taki-mekhalfa/golox/visitor"
 )
 
 const EX_USAGE = 64
@@ -21,7 +21,7 @@ var runtimeErrFunc = func(line int, errMessage string) {
 	fmt.Printf("[line %d] Runtime Error: %s\n", line, errMessage)
 }
 
-var interpreter = visitor.Interpreter{Error: runtimeErrFunc}
+var interpreter_ = interpreter.Interpreter{Error: runtimeErrFunc}
 
 func run(code string) {
 	scanner := scanner.Scanner{Error: syntaxErrFunc}
@@ -39,7 +39,7 @@ func run(code string) {
 		return
 	}
 
-	interpreter.Interpret(stmts)
+	interpreter_.Interpret(stmts)
 }
 
 func runPrompt() {
@@ -53,7 +53,7 @@ func runPrompt() {
 			break
 		}
 		run(scanner.Text())
-		interpreter.ResetErrors()
+		interpreter_.ResetErrors()
 	}
 }
 
@@ -63,7 +63,7 @@ func main() {
 		os.Exit(EX_USAGE)
 	}
 
-	interpreter.Init()
+	interpreter_.Init()
 
 	if len(os.Args) == 2 {
 		// TODO
