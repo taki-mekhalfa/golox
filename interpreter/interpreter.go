@@ -12,20 +12,6 @@ type runtimeError struct {
 	msg   string
 }
 
-type environment struct {
-	values map[string]interface{}
-}
-
-func (e *environment) define(name string, value interface{}) {
-	e.values[name] = value
-}
-
-func (e *environment) get(name string) (interface{}, bool) {
-	v, ok := e.values[name]
-	return v, ok
-
-}
-
 type Interpreter struct {
 	Error      func(line int, errMessage string)
 	ErrorCount int
@@ -115,7 +101,7 @@ func (p *Interpreter) VisitAssign(a *Assign) interface{} {
 		})
 	}
 	v := p.evaluate(a.Value)
-	p.env.define(a.Identifier.Lexeme, v)
+	p.env.assign(a.Identifier.Lexeme, v)
 	return v
 }
 
