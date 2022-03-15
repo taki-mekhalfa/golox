@@ -14,9 +14,8 @@ func main() {
 	}}
 
 	src := `
-		var N = 3 * 4 + 1;
 		var P = N * 2;
-		print P + 3 ;
+		P = 4;
 	`
 
 	scanner.Init(src)
