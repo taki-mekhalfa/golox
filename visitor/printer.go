@@ -49,6 +49,10 @@ func (p PrettyPrinter) VisitPrint(printStmt *Print) interface{} {
 	return fmt.Sprint("PRINT ", p.PrintExpr(printStmt.Expr))
 }
 
+func (p PrettyPrinter) VisitAssign(a *Assign) interface{} {
+	return fmt.Sprintf("var[%s]=%s", a.Identifier.Lexeme, p.PrintExpr(a.Value))
+}
+
 func (p PrettyPrinter) VisitExprStmt(exprStmt *ExprStmt) interface{} {
 	return p.PrintExpr(exprStmt.Expr)
 }
