@@ -24,6 +24,17 @@ func (p *Interpreter) Init() {
 	}
 }
 
+func (p *Interpreter) VisitBlock(b *Block) interface{} {
+	// create a new environment inside the current one
+	env := &environment{values: map[string]interface{}{}, parent: p.env}
+	p.env = env
+	// interpret what's inside
+	p.Interpret(b.Content)
+	// pop the current env
+	p.env = p.env.parent
+	return nil
+}
+
 func (p *Interpreter) VisitExprStmt(es *ExprStmt) interface{} {
 	_ = p.evaluate(es.Expr)
 
