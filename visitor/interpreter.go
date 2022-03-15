@@ -108,6 +108,12 @@ func (p *Interpreter) VisitGrouping(g *Grouping) interface{} {
 }
 
 func (p *Interpreter) VisitAssign(a *Assign) interface{} {
+	if _, defined := p.env.get(a.Identifier.Lexeme); !defined {
+		panic(runtimeError{
+			token: a.Identifier,
+			msg:   fmt.Sprintf("Undefined variable '" + a.Identifier.Lexeme + "'."),
+		})
+	}
 	v := p.evaluate(a.Value)
 	p.env.define(a.Identifier.Lexeme, v)
 	return v
