@@ -57,7 +57,7 @@ func (p *Parser) synchronize() {
 		case token.SEMICOLON:
 			p.next()
 			return
-		case token.CLASS, token.FUN, token.VAR, token.FOR, token.IF, token.WHILE, token.PRINT, token.RETURN:
+		case token.CLASS, token.FUN, token.VAR, token.FOR, token.IF, token.WHILE, token.PRINT, token.RETURN, token.LEFT_BRACE:
 			return
 		default:
 			p.next()
