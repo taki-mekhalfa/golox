@@ -48,3 +48,12 @@ type Var struct {
 func (var_ *Var) Accept(v VisitorExpr) interface{} {
 	return v.VisitVar(var_)
 }
+
+type Assign struct {
+	Identifier token.Token
+	Value      Expr
+}
+
+func (a *Assign) Accept(v VisitorExpr) interface{} {
+	return v.VisitAssign(a)
+}
