@@ -39,13 +39,13 @@ func (p *Interpreter) Init() {
 }
 
 func (p *Interpreter) VisitExprStmt(es *ExprStmt) interface{} {
-	_ = p.Evaluate(es.Expr)
+	_ = p.evaluate(es.Expr)
 
 	return nil
 }
 
 func (p *Interpreter) VisitPrint(printExpr *Print) interface{} {
-	fmt.Println(fmt.Sprint(p.Evaluate(printExpr.Expr)))
+	fmt.Println(fmt.Sprint(p.evaluate(printExpr.Expr)))
 
 	return nil
 }
@@ -105,6 +105,12 @@ func (p *Interpreter) VisitBinary(b *Binary) interface{} {
 
 func (p *Interpreter) VisitGrouping(g *Grouping) interface{} {
 	return g.Expr.Accept(p)
+}
+
+func (p *Interpreter) VisitAssign(a *Assign) interface{} {
+	v := p.evaluate(a.Value)
+	p.env.define(a.Identifier.Lexeme, v)
+	return v
 }
 
 func (p *Interpreter) VisitVar(var_ *Var) interface{} {
@@ -194,7 +200,7 @@ func checkIsNotZero(t token.Token, n float64) {
 	})
 }
 
-func (p *Interpreter) Evaluate(expr Expr) interface{} {
+func (p *Interpreter) evaluate(expr Expr) interface{} {
 	return expr.Accept(p)
 }
 
