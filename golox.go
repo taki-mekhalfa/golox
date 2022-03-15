@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io/ioutil"
 	"os"
 
 	"github.com/taki-mekhalfa/golox/interpreter"
@@ -23,12 +24,12 @@ var runtimeErrFunc = func(line int, errMessage string) {
 
 var interpreter_ = interpreter.Interpreter{Error: runtimeErrFunc}
 
-func run(code string) {
+func run(code string) error {
 	scanner := scanner.Scanner{Error: syntaxErrFunc}
 	scanner.Init(code)
 	scanner.Scan()
 	if scanner.ErrorCount != 0 {
-		return
+		return fmt.Errorf("encountred %d scanner errors", scanner.ErrorCount)
 	}
 
 	parser := parser.Parser{Error: syntaxErrFunc}
@@ -36,10 +37,15 @@ func run(code string) {
 
 	stmts := parser.Parse()
 	if parser.ErrorCount != 0 {
-		return
+		return fmt.Errorf("encountred %d parser errors", parser.ErrorCount)
 	}
 
 	interpreter_.Interpret(stmts)
+	if interpreter_.ErrorCount != 0 {
+		return fmt.Errorf("encountred %d interpreter errors", parser.ErrorCount)
+	}
+
+	return nil
 }
 
 func runPrompt() {
@@ -66,16 +72,14 @@ func main() {
 	interpreter_.Init()
 
 	if len(os.Args) == 2 {
-		// TODO
-
-		// b, err := ioutil.ReadFile(os.Args[1])
-		// if err != nil {
-		// 	fmt.Printf("Could not read the source file: %+v", err)
-		// 	os.Exit(1)
-		// }
-		// if err := run(string(b)); err != nil {
-		// 	os.Exit(EX_DATAERR)
-		// }
+		b, err := ioutil.ReadFile(os.Args[1])
+		if err != nil {
+			fmt.Printf("Could not read the source file: %+v", err)
+			os.Exit(1)
+		}
+		if err := run(string(b)); err != nil {
+			os.Exit(EX_DATAERR)
+		}
 	} else {
 		runPrompt()
 	}
