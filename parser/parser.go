@@ -93,8 +93,30 @@ func (p *Parser) statement() (ast.Stmt, error) {
 	if p.match(token.PRINT) {
 		return p.printStmt()
 	}
+	if p.match(token.LEFT_BRACE) {
+		return p.block()
+	}
 
 	return p.expressionStmt()
+}
+
+func (p *Parser) block() (ast.Stmt, error) {
+	var content []ast.Stmt
+	for !p.isAtEnd() && p.peek().Type != token.RIGHT_BRACE {
+		stmt, err := p.declaration()
+		if err != nil {
+			return nil, err
+		}
+		content = append(content, stmt)
+	}
+	if p.peek().Type != token.RIGHT_BRACE {
+		p.reportError(p.peek().Line, "Expected } after block.")
+		return nil, fmt.Errorf("line %d: expected ; after block", p.peek().Line)
+	}
+
+	// consume the '}'
+	p.next()
+	return &ast.Block{Content: content}, nil
 }
 
 func (p *Parser) printStmt() (ast.Stmt, error) {
