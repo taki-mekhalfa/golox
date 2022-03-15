@@ -28,3 +28,11 @@ type VarStmt struct {
 func (var_ *VarStmt) Accept(v VisitorStmt) interface{} {
 	return v.VisitVarStmt(var_)
 }
+
+type Block struct {
+	Content []Stmt
+}
+
+func (b *Block) Accept(v VisitorStmt) interface{} {
+	return v.VisitBlock(b)
+}

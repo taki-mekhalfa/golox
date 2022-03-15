@@ -13,4 +13,5 @@ type VisitorStmt interface {
 	VisitPrint(*Print) interface{}
 	VisitExprStmt(*ExprStmt) interface{}
 	VisitVarStmt(*VarStmt) interface{}
+	VisitBlock(*Block) interface{}
 }
