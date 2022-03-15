@@ -65,6 +65,18 @@ func (p PrettyPrinter) VisitVarStmt(var_ *VarStmt) interface{} {
 	return fmt.Sprintf("var %s = %s", var_.Name, var_.Initializer.Accept(p))
 }
 
+func (p PrettyPrinter) VisitBlock(b *Block) interface{} {
+	var builder strings.Builder
+	builder.WriteString("{\n")
+	for _, stmt := range b.Content {
+		builder.WriteString(stmt.Accept(p).(string))
+		builder.WriteString("\n")
+	}
+	builder.WriteString("}")
+
+	return builder.String()
+}
+
 func (p PrettyPrinter) PrintExpr(expr Expr) string {
 	return expr.Accept(p).(string)
 }
