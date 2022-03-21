@@ -77,6 +77,19 @@ func (p PrettyPrinter) VisitBlock(b *Block) interface{} {
 	return builder.String()
 }
 
+func (p PrettyPrinter) VisitIf(if_ *If) interface{} {
+	var builder strings.Builder
+	builder.WriteString("if (")
+	builder.WriteString(if_.Condition.Accept(p).(string))
+	builder.WriteString(" ) then ")
+	builder.WriteString(if_.Then.Accept(p).(string))
+	if if_.Else != nil {
+		builder.WriteString("\nelse ")
+		builder.WriteString(if_.Else.Accept(p).(string))
+	}
+	return builder.String()
+}
+
 func (p PrettyPrinter) PrintExpr(expr Expr) string {
 	return expr.Accept(p).(string)
 }
