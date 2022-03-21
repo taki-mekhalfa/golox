@@ -28,11 +28,6 @@ func (p *Parser) Parse() []ast.Stmt {
 		stmt, _ := p.declaration()
 		p.stmts = append(p.stmts, stmt)
 	}
-	// expr, _ := p.expression()
-	// if !p.isAtEnd() {
-	// 	p.reportError(p.peek().Line, fmt.Sprintf("unexpected %s, expecting EOF", p.peek().Lexeme))
-	// 	return nil
-	// }
 	return p.stmts
 }
 
