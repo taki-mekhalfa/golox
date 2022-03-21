@@ -36,3 +36,13 @@ type Block struct {
 func (b *Block) Accept(v VisitorStmt) interface{} {
 	return v.VisitBlock(b)
 }
+
+type If struct {
+	Condition Expr
+	Then      Stmt
+	Else      Stmt
+}
+
+func (if_ *If) Accept(v VisitorStmt) interface{} {
+	return v.VisitIf(if_)
+}
