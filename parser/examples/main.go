@@ -14,9 +14,15 @@ func main() {
 	}}
 
 	src := `
-		{
-			var P = N * 2;
-			x = 4;
+		var i;
+		i = 4;
+		if (i == 6) {
+			print "ok";
+		} else {
+			if (i >= 3){
+				i = i + 1;
+				print "semi-ok";
+			}
 		}
 	`
 

@@ -91,8 +91,38 @@ func (p *Parser) statement() (ast.Stmt, error) {
 	if p.match(token.LEFT_BRACE) {
 		return p.block()
 	}
+	if p.match(token.IF) {
+		return p.if_()
+	}
 
 	return p.expressionStmt()
+}
+
+func (p *Parser) if_() (ast.Stmt, error) {
+	if !p.match(token.LEFT_PAREN) {
+		p.reportError(p.peek().Line, "Expected ( if.")
+		return nil, fmt.Errorf("line %d: expected ( after if", p.peek().Line)
+	}
+	condition, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+	if !p.match(token.RIGHT_PAREN) {
+		p.reportError(p.peek().Line, "Expected ) if condition.")
+		return nil, fmt.Errorf("line %d: expected ) after if condition", p.peek().Line)
+	}
+	then, err := p.statement()
+	if err != nil {
+		return nil, err
+	}
+	var else_ ast.Stmt
+	if p.match(token.ELSE) {
+		else_, err = p.statement()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &ast.If{Condition: condition, Then: then, Else: else_}, nil
 }
 
 func (p *Parser) block() (ast.Stmt, error) {
