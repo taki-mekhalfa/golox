@@ -24,6 +24,11 @@ func (p *Interpreter) Init() {
 	}
 }
 
+func (p *Interpreter) VisitIf(if_ *If) interface{} {
+	// TODO
+	return nil
+}
+
 func (p *Interpreter) VisitBlock(b *Block) interface{} {
 	// create a new environment inside the current one
 	env := &environment{values: map[string]interface{}{}, parent: p.env}
