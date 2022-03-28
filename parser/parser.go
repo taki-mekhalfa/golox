@@ -94,8 +94,31 @@ func (p *Parser) statement() (ast.Stmt, error) {
 	if p.match(token.IF) {
 		return p.if_()
 	}
+	if p.match(token.WHILE) {
+		return p.while()
+	}
 
 	return p.expressionStmt()
+}
+
+func (p *Parser) while() (ast.Stmt, error) {
+	if !p.match(token.LEFT_PAREN) {
+		p.reportError(p.peek().Line, "Expected ( after while.")
+		return nil, fmt.Errorf("line %d: expected ( after while", p.peek().Line)
+	}
+	condition, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+	if !p.match(token.RIGHT_PAREN) {
+		p.reportError(p.peek().Line, "Expected ) after while condition.")
+		return nil, fmt.Errorf("line %d: expected ) after while condition", p.peek().Line)
+	}
+	body, err := p.statement()
+	if err != nil {
+		return nil, err
+	}
+	return &ast.While{Condition: condition, Body: body}, nil
 }
 
 func (p *Parser) if_() (ast.Stmt, error) {
