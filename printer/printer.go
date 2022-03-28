@@ -94,6 +94,15 @@ func (p PrettyPrinter) VisitIf(if_ *If) interface{} {
 	return builder.String()
 }
 
+func (p PrettyPrinter) VisitWhile(while *While) interface{} {
+	var builder strings.Builder
+	builder.WriteString("while (")
+	builder.WriteString(while.Condition.Accept(p).(string))
+	builder.WriteString(") ")
+	builder.WriteString(while.Body.Accept(p).(string))
+	return builder.String()
+}
+
 func (p PrettyPrinter) PrintExpr(expr Expr) string {
 	return expr.Accept(p).(string)
 }
