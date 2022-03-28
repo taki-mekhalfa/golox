@@ -7,6 +7,7 @@ type VisitorExpr interface {
 	VisitUnary(*Unary) interface{}
 	VisitVar(*Var) interface{}
 	VisitAssign(*Assign) interface{}
+	VisitLogical(*Logical) interface{}
 }
 
 type VisitorStmt interface {
