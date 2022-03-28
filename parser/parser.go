@@ -194,7 +194,7 @@ func (p *Parser) while() (ast.Stmt, error) {
 
 func (p *Parser) if_() (ast.Stmt, error) {
 	if !p.match(token.LEFT_PAREN) {
-		p.reportError(p.peek().Line, "Expected ( if.")
+		p.reportError(p.peek().Line, "Expected ( after if.")
 		return nil, fmt.Errorf("line %d: expected ( after if", p.peek().Line)
 	}
 	condition, err := p.expression()
@@ -202,7 +202,7 @@ func (p *Parser) if_() (ast.Stmt, error) {
 		return nil, err
 	}
 	if !p.match(token.RIGHT_PAREN) {
-		p.reportError(p.peek().Line, "Expected ) if condition.")
+		p.reportError(p.peek().Line, "Expected ) after if condition.")
 		return nil, fmt.Errorf("line %d: expected ) after if condition", p.peek().Line)
 	}
 	then, err := p.statement()
