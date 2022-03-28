@@ -26,6 +26,10 @@ func (p PrettyPrinter) VisitBinary(b *Binary) interface{} {
 	return p.parenthesize(b.Operator.Lexeme, b.Left, b.Right)
 }
 
+func (p PrettyPrinter) VisitLogical(l *Logical) interface{} {
+	return p.parenthesize(l.Operator.Lexeme, l.Left, l.Right)
+}
+
 func (p PrettyPrinter) VisitGrouping(g *Grouping) interface{} {
 	return p.parenthesize("group", g.Expr)
 }
