@@ -16,4 +16,5 @@ type VisitorStmt interface {
 	VisitVarStmt(*VarStmt) interface{}
 	VisitBlock(*Block) interface{}
 	VisitIf(*If) interface{}
+	VisitWhile(*While) interface{}
 }

@@ -46,3 +46,12 @@ type If struct {
 func (if_ *If) Accept(v VisitorStmt) interface{} {
 	return v.VisitIf(if_)
 }
+
+type While struct {
+	Condition Expr
+	Body      Stmt
+}
+
+func (while *While) Accept(v VisitorStmt) interface{} {
+	return v.VisitWhile(while)
+}
