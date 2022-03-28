@@ -14,11 +14,11 @@ func main() {
 	}}
 
 	src := `
-		var a = true;
-		var b = false;
-		var c = a;
-
-		print a or b and c;
+		var i = 33;
+		print i;
+		for (var i = 0; i < 3; i = i + 1){
+			print i;
+		}
 	`
 
 	scanner.Init(src)

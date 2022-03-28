@@ -97,8 +97,79 @@ func (p *Parser) statement() (ast.Stmt, error) {
 	if p.match(token.WHILE) {
 		return p.while()
 	}
+	if p.match(token.FOR) {
+		return p.for_()
+	}
 
 	return p.expressionStmt()
+}
+
+// parse a for (A; B; C) {D} into an { A; while(B) {D;C} }
+func (p *Parser) for_() (ast.Stmt, error) {
+	if !p.match(token.LEFT_PAREN) {
+		p.reportError(p.peek().Line, "Expected ( after for.")
+		return nil, fmt.Errorf("line %d: expected ( after for", p.peek().Line)
+	}
+
+	var initializer ast.Stmt
+	var err error
+	switch p.peek().Type {
+	case token.SEMICOLON:
+		p.next()
+	case token.VAR:
+		p.next()
+		if initializer, err = p.var_(); err != nil {
+			return nil, err
+		}
+	default:
+		if initializer, err = p.expressionStmt(); err != nil {
+			return nil, err
+		}
+	}
+
+	var condition ast.Expr
+	if p.peek().Type != token.SEMICOLON {
+		condition, err = p.expression()
+		if err != nil {
+			return nil, err
+		}
+	}
+	if !p.match(token.SEMICOLON) {
+		p.reportError(p.peek().Line, "Expected ; after for condition.")
+		return nil, fmt.Errorf("line %d: expected ; after for condition", p.peek().Line)
+	}
+
+	var increment ast.Expr
+	if p.peek().Type != token.RIGHT_PAREN {
+		increment, err = p.expression()
+		if err != nil {
+			return nil, err
+		}
+	}
+	if !p.match(token.RIGHT_PAREN) {
+		p.reportError(p.peek().Line, "Expected ) after for clauses.")
+		return nil, fmt.Errorf("line %d: expected ) after for clauses", p.peek().Line)
+	}
+
+	body, err := p.statement()
+	if err != nil {
+		return nil, err
+	}
+	if increment != nil {
+		body = &ast.Block{Content: []ast.Stmt{body, &ast.ExprStmt{Expr: increment}}}
+	}
+
+	if condition == nil {
+		condition = &ast.Literal{Value: true}
+	}
+
+	body = &ast.While{Condition: condition, Body: body}
+
+	if initializer != nil {
+		body = &ast.Block{Content: []ast.Stmt{initializer, body}}
+	}
+
+	return body, nil
 }
 
 func (p *Parser) while() (ast.Stmt, error) {
