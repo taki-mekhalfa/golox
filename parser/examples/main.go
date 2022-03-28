@@ -14,16 +14,11 @@ func main() {
 	}}
 
 	src := `
-		var i;
-		i = 4;
-		if (i == 6) {
-			print "ok";
-		} else {
-			if (i >= 3){
-				i = i + 1;
-				print "semi-ok";
-			}
-		}
+		var a = true;
+		var b = false;
+		var c = a;
+
+		print a or b and c;
 	`
 
 	scanner.Init(src)
@@ -43,5 +38,4 @@ func main() {
 			fmt.Println(printer.PrintStmt(stmt))
 		}
 	}
-
 }
