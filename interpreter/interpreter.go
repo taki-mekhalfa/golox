@@ -24,6 +24,14 @@ func (p *Interpreter) Init() {
 	}
 }
 
+func (p *Interpreter) VisitWhile(while *While) interface{} {
+	for truthness(p.evaluate(while.Condition)) {
+		while.Body.Accept(p)
+	}
+
+	return nil
+}
+
 func (p *Interpreter) VisitIf(if_ *If) interface{} {
 	if truthness(p.evaluate(if_.Condition)) {
 		return if_.Then.Accept(p)
