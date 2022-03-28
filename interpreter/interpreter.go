@@ -25,7 +25,13 @@ func (p *Interpreter) Init() {
 }
 
 func (p *Interpreter) VisitIf(if_ *If) interface{} {
-	// TODO
+	if truthness(p.evaluate(if_.Condition)) {
+		return if_.Then.Accept(p)
+	}
+
+	if if_.Else != nil {
+		return if_.Else.Accept(p)
+	}
 	return nil
 }
 
@@ -99,6 +105,19 @@ func (p *Interpreter) VisitBinary(b *Binary) interface{} {
 		return left != right
 	case token.EQUAL_EQUAL:
 		return left == right
+	}
+
+	// should not happen
+	return nil
+}
+
+func (p *Interpreter) VisitLogical(l *Logical) interface{} {
+	switch l.Operator.Type {
+	// golang will take care of short-circuiting both operators
+	case token.AND:
+		return truthness(p.evaluate(l.Left)) && truthness(p.evaluate(l.Right))
+	case token.OR:
+		return truthness(p.evaluate(l.Left)) || truthness(p.evaluate(l.Right))
 	}
 
 	// should not happen
