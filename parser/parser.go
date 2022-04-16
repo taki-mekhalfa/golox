@@ -34,11 +34,16 @@ func (p *Parser) Parse() []ast.Stmt {
 func (p *Parser) declaration() (ast.Stmt, error) {
 	var stmt ast.Stmt
 	var err error
-	if p.match(token.VAR) {
+
+	switch {
+	case p.match(token.VAR):
 		stmt, err = p.var_()
-	} else {
+	case p.match(token.FUN):
+		stmt, err = p.function()
+	default:
 		stmt, err = p.statement()
 	}
+
 	if err != nil {
 		p.synchronize()
 		return nil, err
@@ -82,6 +87,49 @@ func (p *Parser) var_() (ast.Stmt, error) {
 	}
 
 	return &ast.VarStmt{Name: varName, Initializer: initializer}, nil
+}
+
+func (p *Parser) function() (ast.Stmt, error) {
+	if p.peek().Type != token.IDENTIFIER {
+		p.reportError(p.peek().Line, "Expected function name.")
+		return nil, fmt.Errorf("line %d: expected function name", p.peek().Line)
+	}
+
+	functionName := p.next()
+	var params []token.Token
+
+	if !p.match(token.LEFT_PAREN) {
+		p.reportError(p.peek().Line, "Expected ( after function name.")
+		return nil, fmt.Errorf("line %d: expected ( after function name", p.peek().Line)
+	}
+
+	if p.peek().Type != token.RIGHT_PAREN {
+		for {
+			if p.peek().Type != token.IDENTIFIER {
+				p.reportError(p.peek().Line, "Expected parameter name.")
+				return nil, fmt.Errorf("line %d: expected parameter name", p.peek().Line)
+			}
+			params = append(params, p.next())
+			if !p.match(token.COMMA) {
+				break
+			}
+		}
+	}
+
+	if !p.match(token.RIGHT_PAREN) {
+		p.reportError(p.peek().Line, "Expected ) after function parameters.")
+		return nil, fmt.Errorf("line %d: expected ) after function parameters", p.peek().Line)
+	}
+	if !p.match(token.LEFT_BRACE) {
+		p.reportError(p.peek().Line, "Expected { before function body.")
+		return nil, fmt.Errorf("line %d: expected { before function body", p.peek().Line)
+	}
+
+	block, err := p.block()
+	if err != nil {
+		return nil, err
+	}
+	return &ast.Function{Name: functionName, Params: params, Body: block.(*ast.Block).Content}, nil
 }
 
 func (p *Parser) statement() (ast.Stmt, error) {

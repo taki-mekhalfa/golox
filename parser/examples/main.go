@@ -14,11 +14,13 @@ func main() {
 	}}
 
 	src := `
-		var i = 33;
-		print i;
-		for (var i = 0; i < 3; i = i + 1){
-			print i;
+		var sum;
+		fun sum(a,b,c){
+			sum = a + b + c;
 		}
+
+		var j = 4;
+		sum(1,2,j);
 	`
 
 	scanner.Init(src)
