@@ -71,6 +71,12 @@ func (p *Interpreter) VisitPrint(printExpr *Print) interface{} {
 	return nil
 }
 
+func (p *Interpreter) VisitFunction(f *Function) interface{} {
+	p.env.define(f.Name.Lexeme, &function{declaration: f})
+
+	return nil
+}
+
 func (p *Interpreter) VisitVarStmt(var_ *VarStmt) interface{} {
 	if var_.Initializer == nil {
 		p.env.define(var_.Name, nil)
