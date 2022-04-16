@@ -115,6 +115,20 @@ func (p PrettyPrinter) VisitWhile(while *While) interface{} {
 	return builder.String()
 }
 
+func (p PrettyPrinter) VisitFunction(f *Function) interface{} {
+	var builder strings.Builder
+	builder.WriteString("fun ")
+	builder.WriteString(f.Name.Lexeme)
+	builder.WriteString("(")
+	for _, param := range f.Params {
+		builder.WriteString(param.Lexeme)
+		builder.WriteString(",")
+	}
+	builder.WriteString(") ")
+	builder.WriteString(p.PrintStmt(&Block{Content: f.Body}))
+	return builder.String()
+}
+
 func (p PrettyPrinter) PrintExpr(expr Expr) string {
 	return expr.Accept(p).(string)
 }
