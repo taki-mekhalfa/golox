@@ -16,12 +16,19 @@ type Interpreter struct {
 	Error      func(line int, errMessage string)
 	ErrorCount int
 	env        *environment
+	globals    *environment
 }
 
 func (p *Interpreter) Init() {
-	p.env = &environment{
+	// tracks the global scope
+	p.globals = &environment{
 		values: map[string]interface{}{},
 	}
+	// starts up from the global scope and tracks the
+	// current scope when entering/exiting scopes
+	p.env = p.globals
+
+	p.globals.define("clock", clockFn)
 }
 
 func (p *Interpreter) VisitWhile(while *While) interface{} {
@@ -162,6 +169,29 @@ func (p *Interpreter) VisitVar(var_ *Var) interface{} {
 
 func (p *Interpreter) VisitLiteral(l *Literal) interface{} {
 	return l.Value
+}
+
+func (p *Interpreter) VisitCall(c *Call) interface{} {
+	callee, ok := p.evaluate(c.Callee).(callable)
+	if !ok {
+		panic(runtimeError{
+			token: c.ClosingParent,
+			msg:   "Can only call functions and classes.",
+		})
+	}
+	if len(c.Args) != callee.arity() {
+		panic(runtimeError{
+			token: c.ClosingParent,
+			msg:   fmt.Sprintf("Expected %d arguments, but got %d.", callee.arity(), len(c.Args)),
+		})
+	}
+
+	args := []interface{}{}
+	for _, arg := range c.Args {
+		args = append(args, p.evaluate(arg))
+	}
+
+	return callee.call(p, args)
 }
 
 func (p *Interpreter) VisitUnary(u *Unary) interface{} {
