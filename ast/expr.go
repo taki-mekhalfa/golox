@@ -67,3 +67,13 @@ type Logical struct {
 func (l *Logical) Accept(v VisitorExpr) interface{} {
 	return v.VisitLogical(l)
 }
+
+type Call struct {
+	Callee        Expr
+	ClosingParent token.Token
+	Args          []Expr
+}
+
+func (c *Call) Accept(v VisitorExpr) interface{} {
+	return v.VisitCall(c)
+}

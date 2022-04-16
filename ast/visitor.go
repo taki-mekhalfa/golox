@@ -8,6 +8,7 @@ type VisitorExpr interface {
 	VisitVar(*Var) interface{}
 	VisitAssign(*Assign) interface{}
 	VisitLogical(*Logical) interface{}
+	VisitCall(*Call) interface{}
 }
 
 type VisitorStmt interface {
