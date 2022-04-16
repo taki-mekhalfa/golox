@@ -21,9 +21,7 @@ type Interpreter struct {
 
 func (p *Interpreter) Init() {
 	// tracks the global scope
-	p.globals = &environment{
-		values: map[string]interface{}{},
-	}
+	p.globals = newEnvironment(nil)
 	// starts up from the global scope and tracks the
 	// current scope when entering/exiting scopes
 	p.env = p.globals
@@ -52,7 +50,7 @@ func (p *Interpreter) VisitIf(if_ *If) interface{} {
 
 func (p *Interpreter) VisitBlock(b *Block) interface{} {
 	// create a new environment inside the current one
-	env := &environment{values: map[string]interface{}{}, parent: p.env}
+	env := newEnvironment(p.env)
 	p.env = env
 	// interpret what's inside
 	p.Interpret(b.Content)

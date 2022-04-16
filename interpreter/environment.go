@@ -5,6 +5,13 @@ type environment struct {
 	parent *environment
 }
 
+func newEnvironment(parent *environment) *environment {
+	return &environment{
+		values: map[string]interface{}{},
+		parent: parent,
+	}
+}
+
 func (e *environment) define(name string, value interface{}) {
 	e.values[name] = value
 }
