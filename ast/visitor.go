@@ -18,4 +18,5 @@ type VisitorStmt interface {
 	VisitBlock(*Block) interface{}
 	VisitIf(*If) interface{}
 	VisitWhile(*While) interface{}
+	VisitFunction(f *Function) interface{}
 }

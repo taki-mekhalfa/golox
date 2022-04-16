@@ -1,5 +1,9 @@
 package ast
 
+import (
+	"github.com/taki-mekhalfa/golox/token"
+)
+
 type Stmt interface {
 	Accept(VisitorStmt) interface{}
 }
@@ -54,4 +58,14 @@ type While struct {
 
 func (while *While) Accept(v VisitorStmt) interface{} {
 	return v.VisitWhile(while)
+}
+
+type Function struct {
+	Name   token.Token
+	Params []token.Token
+	Body   []Stmt
+}
+
+func (f *Function) Accept(v VisitorStmt) interface{} {
+	return v.VisitFunction(f)
 }
