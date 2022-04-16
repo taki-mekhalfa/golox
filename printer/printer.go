@@ -42,7 +42,19 @@ func (p PrettyPrinter) VisitLiteral(l *Literal) interface{} {
 }
 
 func (p PrettyPrinter) VisitVar(var_ *Var) interface{} {
-	return fmt.Sprintf("var[%s]", var_.Token.Lexeme)
+	return fmt.Sprintf("[%s]", var_.Token.Lexeme)
+}
+
+func (p PrettyPrinter) VisitCall(c *Call) interface{} {
+	var builder strings.Builder
+	builder.WriteString(p.PrintExpr(c.Callee))
+	builder.WriteString("(")
+	for _, arg := range c.Args {
+		builder.WriteString(p.PrintExpr(arg))
+		builder.WriteString(",")
+	}
+	builder.WriteString(")")
+	return builder.String()
 }
 
 func (p PrettyPrinter) VisitUnary(u *Unary) interface{} {
