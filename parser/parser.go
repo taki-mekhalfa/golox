@@ -432,8 +432,54 @@ func (p *Parser) unary() (ast.Expr, error) {
 		}
 		return &ast.Unary{Operator: op, Expr: unary}, nil
 	default:
-		return p.primary()
+		return p.call()
 	}
+}
+
+func (p *Parser) call() (ast.Expr, error) {
+	// parse the identifier
+	expr, err := p.primary()
+	if err != nil {
+		return nil, err
+	}
+	for {
+		// if we don't encounter a '(', we should break
+		if !p.match(token.LEFT_PAREN) {
+			break
+		}
+		// in case the function call has not arguments
+		if p.peek().Type == token.RIGHT_PAREN {
+			expr = &ast.Call{Callee: expr, ClosingParent: p.next(), Args: nil}
+			continue
+		}
+
+		// we should parse at least on argument
+		args, err := p.args()
+		if err != nil {
+			return nil, err
+		}
+		if p.peek().Type != token.RIGHT_PAREN {
+			p.reportError(p.peek().Line, "Expected ) after function call.")
+			return nil, fmt.Errorf("line %d: expected ) after function call", p.peek().Line)
+		}
+		expr = &ast.Call{Callee: expr, ClosingParent: p.next(), Args: args}
+	}
+	return expr, nil
+}
+
+func (p *Parser) args() ([]ast.Expr, error) {
+	var args []ast.Expr
+	for {
+		expr, err := p.expression()
+		if err != nil {
+			return nil, err
+		}
+		args = append(args, expr)
+		if !p.match(token.COMMA) {
+			break
+		}
+	}
+	return args, nil
 }
 
 func (p *Parser) primary() (ast.Expr, error) {
