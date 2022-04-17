@@ -82,7 +82,7 @@ func (i *Interpreter) VisitPrint(printExpr *Print) interface{} {
 }
 
 func (i *Interpreter) VisitFunction(f *Function) interface{} {
-	i.env.define(f.Name.Lexeme, &function{declaration: f})
+	i.env.define(f.Name.Lexeme, &function{declaration: f, closure: i.env})
 
 	return nil
 }

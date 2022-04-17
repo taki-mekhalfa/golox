@@ -30,6 +30,7 @@ type return_ struct {
 }
 
 type function struct {
+	closure     *environment
 	declaration *ast.Function
 }
 
@@ -55,7 +56,7 @@ func (f *function) call(interpreter *Interpreter, args []interface{}) (ret inter
 	}()
 
 	// create a new environement exclusive to this function call starting-up from the global env
-	functionEnv := newEnvironment(interpreter.globals)
+	functionEnv := newEnvironment(f.closure)
 	interpreter.env = functionEnv
 
 	// bind function parameters to arguments
