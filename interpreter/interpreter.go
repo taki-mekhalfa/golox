@@ -210,9 +210,9 @@ func (i *Interpreter) VisitCall(c *Call) interface{} {
 
 func (i *Interpreter) VisitReturn(r *Return) interface{} {
 	if r.Value == nil {
-		panic(return_(nil))
+		panic(return_{value: nil})
 	}
-	panic(return_(r.Value.Accept(i)))
+	panic(return_{value: r.Value.Accept(i)})
 }
 
 func (i *Interpreter) VisitUnary(u *Unary) interface{} {

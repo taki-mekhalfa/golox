@@ -25,7 +25,9 @@ func (c *clock) call(interpreter *Interpreter, args []interface{}) interface{} {
 	return time.Now().Unix()
 }
 
-type return_ interface{}
+type return_ struct {
+	value interface{}
+}
 
 type function struct {
 	declaration *ast.Function
@@ -37,13 +39,15 @@ func (f *function) call(interpreter *Interpreter, args []interface{}) (ret inter
 	previous := interpreter.env
 
 	defer func() {
-		err := recover()
+		// recover back the interpreter environement
+		interpreter.env = previous
 
-		var ok bool
-		ret, ok = err.(return_)
-		if err == nil || ok {
-			// recover back the interpreter environement
-			interpreter.env = previous
+		err := recover()
+		if err == nil {
+			return
+		}
+		if ret_, ok := err.(return_); ok {
+			ret = ret_.value
 			return
 		}
 		// if the error is not nil or a return value, panic again to not silently hide the error
