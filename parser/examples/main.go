@@ -16,11 +16,11 @@ func main() {
 	src := `
 		var sum;
 		fun sum(a,b,c){
-			sum = a + b + c;
+			return a + b + c;
 		}
 
 		var j = 4;
-		sum(1,2,j);
+		print sum(1,2,j);
 	`
 
 	scanner.Init(src)

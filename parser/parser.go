@@ -148,8 +148,27 @@ func (p *Parser) statement() (ast.Stmt, error) {
 	if p.match(token.FOR) {
 		return p.for_()
 	}
+	if p.match(token.RETURN) {
+		return p.return_()
+	}
 
 	return p.expressionStmt()
+}
+
+func (p *Parser) return_() (ast.Stmt, error) {
+	ret := &ast.Return{}
+	if p.peek().Type != token.SEMICOLON {
+		expr, err := p.expression()
+		if err != nil {
+			return nil, err
+		}
+		ret.Value = expr
+	}
+	if !p.match(token.SEMICOLON) {
+		p.reportError(p.peek().Line, "Expected ; after return.")
+		return nil, fmt.Errorf("line %d: expected ; after return", p.peek().Line)
+	}
+	return ret, nil
 }
 
 // parse a for (A; B; C) {D} into an { A; while(B) {D;C} }
