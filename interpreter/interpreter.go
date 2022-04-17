@@ -19,76 +19,76 @@ type Interpreter struct {
 	globals    *environment
 }
 
-func (p *Interpreter) Init() {
+func (i *Interpreter) Init() {
 	// tracks the global scope
-	p.globals = newEnvironment(nil)
+	i.globals = newEnvironment(nil)
 	// starts up from the global scope and tracks the
 	// current scope when entering/exiting scopes
-	p.env = p.globals
+	i.env = i.globals
 
-	p.globals.define("clock", clockFn)
+	i.globals.define("clock", clockFn)
 }
 
-func (p *Interpreter) VisitWhile(while *While) interface{} {
-	for truthness(p.evaluate(while.Condition)) {
-		while.Body.Accept(p)
+func (i *Interpreter) VisitWhile(while *While) interface{} {
+	for truthness(i.evaluate(while.Condition)) {
+		while.Body.Accept(i)
 	}
 
 	return nil
 }
 
-func (p *Interpreter) VisitIf(if_ *If) interface{} {
-	if truthness(p.evaluate(if_.Condition)) {
-		return if_.Then.Accept(p)
+func (i *Interpreter) VisitIf(if_ *If) interface{} {
+	if truthness(i.evaluate(if_.Condition)) {
+		return if_.Then.Accept(i)
 	}
 
 	if if_.Else != nil {
-		return if_.Else.Accept(p)
+		return if_.Else.Accept(i)
 	}
 	return nil
 }
 
-func (p *Interpreter) VisitBlock(b *Block) interface{} {
+func (i *Interpreter) VisitBlock(b *Block) interface{} {
 	// create a new environment inside the current one
-	env := newEnvironment(p.env)
-	p.env = env
+	env := newEnvironment(i.env)
+	i.env = env
 	// interpret what's inside
-	p.Interpret(b.Content)
+	i.Interpret(b.Content)
 	// pop the current env
-	p.env = p.env.parent
+	i.env = i.env.parent
 	return nil
 }
 
-func (p *Interpreter) VisitExprStmt(es *ExprStmt) interface{} {
-	_ = p.evaluate(es.Expr)
-
-	return nil
-}
-
-func (p *Interpreter) VisitPrint(printExpr *Print) interface{} {
-	fmt.Println(fmt.Sprint(p.evaluate(printExpr.Expr)))
+func (i *Interpreter) VisitExprStmt(es *ExprStmt) interface{} {
+	_ = i.evaluate(es.Expr)
 
 	return nil
 }
 
-func (p *Interpreter) VisitFunction(f *Function) interface{} {
-	p.env.define(f.Name.Lexeme, &function{declaration: f})
+func (i *Interpreter) VisitPrint(printExpr *Print) interface{} {
+	fmt.Println(fmt.Sprint(i.evaluate(printExpr.Expr)))
 
 	return nil
 }
 
-func (p *Interpreter) VisitVarStmt(var_ *VarStmt) interface{} {
+func (i *Interpreter) VisitFunction(f *Function) interface{} {
+	i.env.define(f.Name.Lexeme, &function{declaration: f})
+
+	return nil
+}
+
+func (i *Interpreter) VisitVarStmt(var_ *VarStmt) interface{} {
 	if var_.Initializer == nil {
-		p.env.define(var_.Name, nil)
+		i.env.define(var_.Name, nil)
 	} else {
-		p.env.define(var_.Name, var_.Initializer.Accept(p))
+		i.env.define(var_.Name, var_.Initializer.Accept(i))
 	}
 
 	return nil
 }
 
-func (p *Interpreter) VisitBinary(b *Binary) interface{} {
-	left, right := b.Left.Accept(p), b.Right.Accept(p)
+func (i *Interpreter) VisitBinary(b *Binary) interface{} {
+	left, right := b.Left.Accept(i), b.Right.Accept(i)
 
 	switch b.Operator.Type {
 	case token.STAR:
@@ -130,37 +130,37 @@ func (p *Interpreter) VisitBinary(b *Binary) interface{} {
 	return nil
 }
 
-func (p *Interpreter) VisitLogical(l *Logical) interface{} {
+func (i *Interpreter) VisitLogical(l *Logical) interface{} {
 	switch l.Operator.Type {
 	// golang will take care of short-circuiting both operators
 	case token.AND:
-		return truthness(p.evaluate(l.Left)) && truthness(p.evaluate(l.Right))
+		return truthness(i.evaluate(l.Left)) && truthness(i.evaluate(l.Right))
 	case token.OR:
-		return truthness(p.evaluate(l.Left)) || truthness(p.evaluate(l.Right))
+		return truthness(i.evaluate(l.Left)) || truthness(i.evaluate(l.Right))
 	}
 
 	// should not happen
 	return nil
 }
 
-func (p *Interpreter) VisitGrouping(g *Grouping) interface{} {
-	return g.Expr.Accept(p)
+func (i *Interpreter) VisitGrouping(g *Grouping) interface{} {
+	return g.Expr.Accept(i)
 }
 
-func (p *Interpreter) VisitAssign(a *Assign) interface{} {
-	if _, defined := p.env.get(a.Identifier.Lexeme); !defined {
+func (i *Interpreter) VisitAssign(a *Assign) interface{} {
+	if _, defined := i.env.get(a.Identifier.Lexeme); !defined {
 		panic(runtimeError{
 			token: a.Identifier,
 			msg:   fmt.Sprintf("Undefined variable '" + a.Identifier.Lexeme + "'."),
 		})
 	}
-	v := p.evaluate(a.Value)
-	p.env.assign(a.Identifier.Lexeme, v)
+	v := i.evaluate(a.Value)
+	i.env.assign(a.Identifier.Lexeme, v)
 	return v
 }
 
-func (p *Interpreter) VisitVar(var_ *Var) interface{} {
-	v, defined := p.env.get(var_.Token.Lexeme)
+func (i *Interpreter) VisitVar(var_ *Var) interface{} {
+	v, defined := i.env.get(var_.Token.Lexeme)
 	if !defined {
 		panic(runtimeError{
 			token: var_.Token,
@@ -171,12 +171,12 @@ func (p *Interpreter) VisitVar(var_ *Var) interface{} {
 	return v
 }
 
-func (p *Interpreter) VisitLiteral(l *Literal) interface{} {
+func (i *Interpreter) VisitLiteral(l *Literal) interface{} {
 	return l.Value
 }
 
-func (p *Interpreter) VisitCall(c *Call) interface{} {
-	callee, ok := p.evaluate(c.Callee).(callable)
+func (i *Interpreter) VisitCall(c *Call) interface{} {
+	callee, ok := i.evaluate(c.Callee).(callable)
 	if !ok {
 		panic(runtimeError{
 			token: c.ClosingParent,
@@ -192,14 +192,17 @@ func (p *Interpreter) VisitCall(c *Call) interface{} {
 
 	args := []interface{}{}
 	for _, arg := range c.Args {
-		args = append(args, p.evaluate(arg))
+		args = append(args, i.evaluate(arg))
 	}
 
-	return callee.call(p, args)
+	return callee.call(i, args)
 }
 
 func (p *Interpreter) VisitUnary(u *Unary) interface{} {
 	v := u.Expr.Accept(p)
+
+func (i *Interpreter) VisitUnary(u *Unary) interface{} {
+	v := u.Expr.Accept(i)
 	switch u.Operator.Type {
 	case token.BANG:
 		return !truthness(v)
@@ -269,29 +272,29 @@ func checkIsNotZero(t token.Token, n float64) {
 	})
 }
 
-func (p *Interpreter) evaluate(expr Expr) interface{} {
-	return expr.Accept(p)
+func (i *Interpreter) evaluate(expr Expr) interface{} {
+	return expr.Accept(i)
 }
 
-func (p *Interpreter) Interpret(stmts []Stmt) {
+func (i *Interpreter) Interpret(stmts []Stmt) {
 	defer func() {
 		err := recover()
 		if err == nil {
 			return
 		}
 		if runtimeErr, ok := err.(runtimeError); ok {
-			p.ErrorCount++
-			p.Error(runtimeErr.token.Line, runtimeErr.msg)
+			i.ErrorCount++
+			i.Error(runtimeErr.token.Line, runtimeErr.msg)
 			return
 		}
 		panic(err)
 	}()
 
 	for _, stmt := range stmts {
-		stmt.Accept(p)
+		stmt.Accept(i)
 	}
 }
 
-func (p *Interpreter) ResetErrors() {
-	p.ErrorCount = 0
+func (i *Interpreter) ResetErrors() {
+	i.ErrorCount = 0
 }
