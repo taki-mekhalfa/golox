@@ -49,13 +49,23 @@ func (i *Interpreter) VisitIf(if_ *If) interface{} {
 }
 
 func (i *Interpreter) VisitBlock(b *Block) interface{} {
+	// save current environment to recover back later
+	previous := i.env
+	defer func() {
+		// pop the current env
+		// we run this in a defer to get back the previous envs
+		// even in case of a runtime error.
+		// this is important when we use the prompt.
+		i.env = previous
+	}()
+
 	// create a new environment inside the current one
 	env := newEnvironment(i.env)
 	i.env = env
 	// interpret what's inside
-	i.Interpret(b.Content)
-	// pop the current env
-	i.env = i.env.parent
+	for _, stmt := range b.Content {
+		stmt.Accept(i)
+	}
 	return nil
 }
 
