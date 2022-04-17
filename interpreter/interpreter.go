@@ -208,8 +208,12 @@ func (i *Interpreter) VisitCall(c *Call) interface{} {
 	return callee.call(i, args)
 }
 
-func (p *Interpreter) VisitUnary(u *Unary) interface{} {
-	v := u.Expr.Accept(p)
+func (i *Interpreter) VisitReturn(r *Return) interface{} {
+	if r.Value == nil {
+		panic(return_(nil))
+	}
+	panic(return_(r.Value.Accept(i)))
+}
 
 func (i *Interpreter) VisitUnary(u *Unary) interface{} {
 	v := u.Expr.Accept(i)
