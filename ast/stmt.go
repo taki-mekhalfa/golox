@@ -69,3 +69,11 @@ type Function struct {
 func (f *Function) Accept(v VisitorStmt) interface{} {
 	return v.VisitFunction(f)
 }
+
+type Return struct {
+	Value Expr
+}
+
+func (r *Return) Accept(v VisitorStmt) interface{} {
+	return v.VisitReturn(r)
+}
