@@ -16,13 +16,12 @@ type callable interface {
 	arity() int
 }
 
-type clock struct {
-}
+type clock struct{}
 
 func (c *clock) arity() int { return 0 }
 
 func (c *clock) call(interpreter *Interpreter, args []interface{}) interface{} {
-	return time.Now().Unix()
+	return float64(time.Now().Unix())
 }
 
 type return_ struct {
