@@ -129,6 +129,10 @@ func (p PrettyPrinter) VisitFunction(f *Function) interface{} {
 	return builder.String()
 }
 
+func (p PrettyPrinter) VisitReturn(r *Return) interface{} {
+	return "return " + p.PrintExpr(r.Value)
+}
+
 func (p PrettyPrinter) PrintExpr(expr Expr) string {
 	return expr.Accept(p).(string)
 }
