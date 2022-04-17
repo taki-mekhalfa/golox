@@ -297,7 +297,7 @@ func (p *Parser) block() (ast.Stmt, error) {
 	}
 	if p.peek().Type != token.RIGHT_BRACE {
 		p.reportError(p.peek().Line, "Expected } after block.")
-		return nil, fmt.Errorf("line %d: expected ; after block", p.peek().Line)
+		return nil, fmt.Errorf("line %d: expected } after block", p.peek().Line)
 	}
 
 	// consume the '}'
