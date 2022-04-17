@@ -58,7 +58,7 @@ func runPrompt() {
 			}
 			break
 		}
-		run(scanner.Text())
+		_ = run(scanner.Text())
 		interpreter_.ResetErrors()
 	}
 }
