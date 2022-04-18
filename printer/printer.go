@@ -15,7 +15,7 @@ func (p PrettyPrinter) parenthesize(name string, exprs ...Expr) string {
 	builder.WriteString(name)
 	for _, expr := range exprs {
 		builder.WriteString(" ")
-		builder.WriteString(expr.Accept(p).(string))
+		builder.WriteString(p.PrintExpr(expr))
 	}
 	builder.WriteString(")")
 
@@ -78,14 +78,14 @@ func (p PrettyPrinter) VisitVarStmt(var_ *VarStmt) interface{} {
 		return fmt.Sprintf("var %s", var_.Name)
 	}
 
-	return fmt.Sprintf("var %s = %s", var_.Name, var_.Initializer.Accept(p))
+	return fmt.Sprintf("var %s = %s", var_.Name, p.PrintExpr(var_.Initializer))
 }
 
 func (p PrettyPrinter) VisitBlock(b *Block) interface{} {
 	var builder strings.Builder
 	builder.WriteString("{\n")
 	for _, stmt := range b.Content {
-		builder.WriteString(stmt.Accept(p).(string))
+		builder.WriteString(p.PrintStmt(stmt))
 		builder.WriteString("\n")
 	}
 	builder.WriteString("}")
@@ -96,12 +96,12 @@ func (p PrettyPrinter) VisitBlock(b *Block) interface{} {
 func (p PrettyPrinter) VisitIf(if_ *If) interface{} {
 	var builder strings.Builder
 	builder.WriteString("if (")
-	builder.WriteString(if_.Condition.Accept(p).(string))
+	builder.WriteString(p.PrintExpr(if_.Condition))
 	builder.WriteString(" ) then ")
-	builder.WriteString(if_.Then.Accept(p).(string))
+	builder.WriteString(p.PrintStmt(if_.Then))
 	if if_.Else != nil {
 		builder.WriteString("\nelse ")
-		builder.WriteString(if_.Else.Accept(p).(string))
+		builder.WriteString(p.PrintStmt(if_.Else))
 	}
 	return builder.String()
 }
@@ -109,9 +109,9 @@ func (p PrettyPrinter) VisitIf(if_ *If) interface{} {
 func (p PrettyPrinter) VisitWhile(while *While) interface{} {
 	var builder strings.Builder
 	builder.WriteString("while (")
-	builder.WriteString(while.Condition.Accept(p).(string))
+	builder.WriteString(p.PrintExpr(while.Condition))
 	builder.WriteString(") ")
-	builder.WriteString(while.Body.Accept(p).(string))
+	builder.WriteString(p.PrintStmt(while.Body))
 	return builder.String()
 }
 
