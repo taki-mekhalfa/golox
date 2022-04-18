@@ -82,6 +82,8 @@ func (i *Interpreter) VisitPrint(printExpr *Print) interface{} {
 }
 
 func (i *Interpreter) VisitFunction(f *Function) interface{} {
+	// define the funciton in the current scope
+	// and allow the function to close on it
 	i.env.define(f.Name.Lexeme, &function{declaration: f, closure: i.env})
 
 	return nil
@@ -164,7 +166,7 @@ func (i *Interpreter) VisitAssign(a *Assign) interface{} {
 			msg:   fmt.Sprintf("Undefined variable '" + a.Identifier.Lexeme + "'."),
 		})
 	}
-	v := i.evaluate(a.Value)
+	// update the symbol's value
 	i.env.assign(a.Identifier.Lexeme, v)
 	return v
 }
@@ -201,6 +203,7 @@ func (i *Interpreter) VisitCall(c *Call) interface{} {
 	}
 
 	args := []interface{}{}
+	// evaluate function's args
 	for _, arg := range c.Args {
 		args = append(args, i.evaluate(arg))
 	}
@@ -209,6 +212,10 @@ func (i *Interpreter) VisitCall(c *Call) interface{} {
 }
 
 func (i *Interpreter) VisitReturn(r *Return) interface{} {
+	// panic to bubble the return value up
+	// to the calling point.
+	// one could use errors to propagate the return value
+	// but I preferred to keep things simple.
 	if r.Value == nil {
 		panic(return_{value: nil})
 	}
@@ -229,6 +236,8 @@ func (i *Interpreter) VisitUnary(u *Unary) interface{} {
 	return nil
 }
 
+// truthness returns true if v is true and false otherwise.
+// everything is true expect for a boolean false or a <nil>
 func truthness(v interface{}) bool {
 	if v == nil {
 		return false

@@ -27,6 +27,7 @@ func (e *environment) assign(name string, value interface{}) {
 func (e *environment) get(name string) (interface{}, bool) {
 	v, ok := e.values[name]
 	if !ok && e.parent != nil {
+		// check the parent environement if the symbol is not defined in the current one
 		return e.parent.get(name)
 	}
 	return v, ok

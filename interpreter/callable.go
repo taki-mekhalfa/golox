@@ -7,6 +7,7 @@ import (
 )
 
 var (
+	// clockFn is a built-in function that returns the current time in unix seconds
 	clockFn = &clock{}
 )
 
@@ -44,6 +45,8 @@ func (f *function) call(interpreter *Interpreter, args []interface{}) (ret inter
 
 		err := recover()
 		if err == nil {
+			// if the function returns nothing or does not have a returns statement
+			// we return <nil>
 			return
 		}
 		if ret_, ok := err.(return_); ok {
@@ -63,7 +66,10 @@ func (f *function) call(interpreter *Interpreter, args []interface{}) (ret inter
 		functionEnv.define(param.Lexeme, args[i])
 	}
 
-	// exectue the function body
+	// exectue the function body.
+	// we don't use a block as a function body because a block will create
+	// a new scope which is not what we want.
+	// we want the arguments to be in the same scope as the function body.
 	for _, stmt := range f.declaration.Body {
 		stmt.Accept(interpreter)
 	}
