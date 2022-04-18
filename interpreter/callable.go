@@ -71,7 +71,7 @@ func (f *function) call(interpreter *Interpreter, args []interface{}) (ret inter
 	// a new scope which is not what we want.
 	// we want the arguments to be in the same scope as the function body.
 	for _, stmt := range f.declaration.Body {
-		stmt.Accept(interpreter)
+		interpreter.evaluateStmt(stmt)
 	}
 
 	return

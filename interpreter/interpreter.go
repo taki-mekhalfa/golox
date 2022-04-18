@@ -30,20 +30,20 @@ func (i *Interpreter) Init() {
 }
 
 func (i *Interpreter) VisitWhile(while *While) interface{} {
-	for truthness(i.evaluate(while.Condition)) {
-		while.Body.Accept(i)
+	for truthness(i.evaluateExpr(while.Condition)) {
+		i.evaluateStmt(while.Body)
 	}
 
 	return nil
 }
 
 func (i *Interpreter) VisitIf(if_ *If) interface{} {
-	if truthness(i.evaluate(if_.Condition)) {
-		return if_.Then.Accept(i)
+	if truthness(i.evaluateExpr(if_.Condition)) {
+		return i.evaluateStmt(if_.Then)
 	}
 
 	if if_.Else != nil {
-		return if_.Else.Accept(i)
+		return i.evaluateStmt(if_.Else)
 	}
 	return nil
 }
@@ -64,19 +64,19 @@ func (i *Interpreter) VisitBlock(b *Block) interface{} {
 	i.env = env
 	// interpret what's inside
 	for _, stmt := range b.Content {
-		stmt.Accept(i)
+		i.evaluateStmt(stmt)
 	}
 	return nil
 }
 
 func (i *Interpreter) VisitExprStmt(es *ExprStmt) interface{} {
-	_ = i.evaluate(es.Expr)
+	_ = i.evaluateExpr(es.Expr)
 
 	return nil
 }
 
 func (i *Interpreter) VisitPrint(printExpr *Print) interface{} {
-	fmt.Println(fmt.Sprint(i.evaluate(printExpr.Expr)))
+	fmt.Println(fmt.Sprint(i.evaluateExpr(printExpr.Expr)))
 
 	return nil
 }
@@ -93,14 +93,14 @@ func (i *Interpreter) VisitVarStmt(var_ *VarStmt) interface{} {
 	if var_.Initializer == nil {
 		i.env.define(var_.Name, nil)
 	} else {
-		i.env.define(var_.Name, var_.Initializer.Accept(i))
+		i.env.define(var_.Name, i.evaluateExpr(var_.Initializer))
 	}
 
 	return nil
 }
 
 func (i *Interpreter) VisitBinary(b *Binary) interface{} {
-	left, right := b.Left.Accept(i), b.Right.Accept(i)
+	left, right := i.evaluateExpr(b.Left), i.evaluateExpr(b.Right)
 
 	switch b.Operator.Type {
 	case token.STAR:
@@ -146,9 +146,9 @@ func (i *Interpreter) VisitLogical(l *Logical) interface{} {
 	switch l.Operator.Type {
 	// golang will take care of short-circuiting both operators
 	case token.AND:
-		return truthness(i.evaluate(l.Left)) && truthness(i.evaluate(l.Right))
+		return truthness(i.evaluateExpr(l.Left)) && truthness(i.evaluateExpr(l.Right))
 	case token.OR:
-		return truthness(i.evaluate(l.Left)) || truthness(i.evaluate(l.Right))
+		return truthness(i.evaluateExpr(l.Left)) || truthness(i.evaluateExpr(l.Right))
 	}
 
 	// should not happen
@@ -156,7 +156,7 @@ func (i *Interpreter) VisitLogical(l *Logical) interface{} {
 }
 
 func (i *Interpreter) VisitGrouping(g *Grouping) interface{} {
-	return g.Expr.Accept(i)
+	return i.evaluateExpr(g.Expr)
 }
 
 func (i *Interpreter) VisitAssign(a *Assign) interface{} {
@@ -166,6 +166,7 @@ func (i *Interpreter) VisitAssign(a *Assign) interface{} {
 			msg:   fmt.Sprintf("Undefined variable '" + a.Identifier.Lexeme + "'."),
 		})
 	}
+	v := i.evaluateExpr(a.Value)
 	// update the symbol's value
 	i.env.assign(a.Identifier.Lexeme, v)
 	return v
@@ -188,7 +189,7 @@ func (i *Interpreter) VisitLiteral(l *Literal) interface{} {
 }
 
 func (i *Interpreter) VisitCall(c *Call) interface{} {
-	callee, ok := i.evaluate(c.Callee).(callable)
+	callee, ok := i.evaluateExpr(c.Callee).(callable)
 	if !ok {
 		panic(runtimeError{
 			token: c.ClosingParent,
@@ -205,7 +206,7 @@ func (i *Interpreter) VisitCall(c *Call) interface{} {
 	args := []interface{}{}
 	// evaluate function's args
 	for _, arg := range c.Args {
-		args = append(args, i.evaluate(arg))
+		args = append(args, i.evaluateExpr(arg))
 	}
 
 	return callee.call(i, args)
@@ -219,11 +220,11 @@ func (i *Interpreter) VisitReturn(r *Return) interface{} {
 	if r.Value == nil {
 		panic(return_{value: nil})
 	}
-	panic(return_{value: r.Value.Accept(i)})
+	panic(return_{value: i.evaluateExpr(r.Value)})
 }
 
 func (i *Interpreter) VisitUnary(u *Unary) interface{} {
-	v := u.Expr.Accept(i)
+	v := i.evaluateExpr(u.Expr)
 	switch u.Operator.Type {
 	case token.BANG:
 		return !truthness(v)
@@ -295,8 +296,12 @@ func checkIsNotZero(t token.Token, n float64) {
 	})
 }
 
-func (i *Interpreter) evaluate(expr Expr) interface{} {
+func (i *Interpreter) evaluateExpr(expr Expr) interface{} {
 	return expr.Accept(i)
+}
+
+func (i *Interpreter) evaluateStmt(stmt Stmt) interface{} {
+	return stmt.Accept(i)
 }
 
 func (i *Interpreter) Interpret(stmts []Stmt) {
@@ -314,7 +319,7 @@ func (i *Interpreter) Interpret(stmts []Stmt) {
 	}()
 
 	for _, stmt := range stmts {
-		stmt.Accept(i)
+		i.evaluateStmt(stmt)
 	}
 }
 
