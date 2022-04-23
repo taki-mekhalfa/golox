@@ -27,6 +27,7 @@ func (es *ExprStmt) Accept(v VisitorStmt) interface{} {
 type VarStmt struct {
 	Name        string
 	Initializer Expr
+	Token       token.Token
 }
 
 func (var_ *VarStmt) Accept(v VisitorStmt) interface{} {
@@ -72,6 +73,7 @@ func (f *Function) Accept(v VisitorStmt) interface{} {
 
 type Return struct {
 	Value Expr
+	token.Token
 }
 
 func (r *Return) Accept(v VisitorStmt) interface{} {

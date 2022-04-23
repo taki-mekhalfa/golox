@@ -71,7 +71,7 @@ func (p *Parser) var_() (ast.Stmt, error) {
 		return nil, fmt.Errorf("line %d: expected identifier after var", p.peek().Line)
 	}
 
-	varName := p.next().Lexeme
+	varToken := p.next()
 	var initializer ast.Expr
 	var err error
 	if p.match(token.EQUAL) {
@@ -86,7 +86,7 @@ func (p *Parser) var_() (ast.Stmt, error) {
 		return nil, fmt.Errorf("line %d: expected ; after variable declaration", p.peek().Line)
 	}
 
-	return &ast.VarStmt{Name: varName, Initializer: initializer}, nil
+	return &ast.VarStmt{Name: varToken.Lexeme, Initializer: initializer, Token: varToken}, nil
 }
 
 func (p *Parser) function() (ast.Stmt, error) {
@@ -148,15 +148,16 @@ func (p *Parser) statement() (ast.Stmt, error) {
 	if p.match(token.FOR) {
 		return p.for_()
 	}
-	if p.match(token.RETURN) {
-		return p.return_()
+	if p.peek().Type == token.RETURN {
+		retToken := p.next()
+		return p.return_(retToken)
 	}
 
 	return p.expressionStmt()
 }
 
-func (p *Parser) return_() (ast.Stmt, error) {
-	ret := &ast.Return{}
+func (p *Parser) return_(retToken token.Token) (ast.Stmt, error) {
+	ret := &ast.Return{Token: retToken}
 	if p.peek().Type != token.SEMICOLON {
 		expr, err := p.expression()
 		if err != nil {
