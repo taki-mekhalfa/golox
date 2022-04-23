@@ -1,5 +1,23 @@
 package interpreter
 
+import "github.com/taki-mekhalfa/golox/ast"
+
+func (i *Interpreter) Resolve(expr ast.Expr, distance int) {
+	i.scopeDists[expr] = distance
+}
+
+func (i *Interpreter) lookUp(expr ast.Expr, name string) (interface{}, bool) {
+	dist, ok := i.scopeDists[expr]
+	if ok {
+		env := i.env
+		for i := 0; i < dist; i++ {
+			env = env.parent
+		}
+		return env.get(name)
+	}
+	return i.globals.get(name)
+}
+
 type environment struct {
 	values map[string]interface{}
 	parent *environment

@@ -17,6 +17,7 @@ type Interpreter struct {
 	ErrorCount int
 	env        *environment
 	globals    *environment
+	scopeDists map[Expr]int
 }
 
 func (i *Interpreter) Init() {
@@ -25,8 +26,8 @@ func (i *Interpreter) Init() {
 	// starts up from the global scope and tracks the
 	// current scope when entering/exiting scopes
 	i.env = i.globals
-
 	i.globals.define("clock", clockFn)
+	i.scopeDists = make(map[Expr]int)
 }
 
 func (i *Interpreter) VisitWhile(while *While) interface{} {
@@ -160,7 +161,7 @@ func (i *Interpreter) VisitGrouping(g *Grouping) interface{} {
 }
 
 func (i *Interpreter) VisitAssign(a *Assign) interface{} {
-	if _, defined := i.env.get(a.Identifier.Lexeme); !defined {
+	if _, defined := i.lookUp(a, a.Identifier.Lexeme); !defined {
 		panic(runtimeError{
 			token: a.Identifier,
 			msg:   fmt.Sprintf("Undefined variable '" + a.Identifier.Lexeme + "'."),
@@ -173,7 +174,7 @@ func (i *Interpreter) VisitAssign(a *Assign) interface{} {
 }
 
 func (i *Interpreter) VisitVar(var_ *Var) interface{} {
-	v, defined := i.env.get(var_.Token.Lexeme)
+	v, defined := i.lookUp(var_, var_.Token.Lexeme)
 	if !defined {
 		panic(runtimeError{
 			token: var_.Token,
