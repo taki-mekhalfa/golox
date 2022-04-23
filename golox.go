@@ -8,6 +8,7 @@ import (
 
 	"github.com/taki-mekhalfa/golox/interpreter"
 	"github.com/taki-mekhalfa/golox/parser"
+	"github.com/taki-mekhalfa/golox/resolver"
 	"github.com/taki-mekhalfa/golox/scanner"
 )
 
@@ -40,6 +41,15 @@ func run(code string) error {
 		return fmt.Errorf("encountred %d parser errors", parser.ErrorCount)
 	}
 
+	resolver := &resolver.Resolver{
+		Error:  runtimeErrFunc,
+		Interp: &interpreter_,
+	}
+
+	resolver.Resolve(stmts)
+	if resolver.ErrorCount != 0 {
+		return fmt.Errorf("encountred %d resolver errors", parser.ErrorCount)
+	}
 	interpreter_.Interpret(stmts)
 	if interpreter_.ErrorCount != 0 {
 		return fmt.Errorf("encountred %d interpreter errors", parser.ErrorCount)
