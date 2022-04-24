@@ -57,6 +57,9 @@ func (r *Resolver) VisitClass(c *Class) (void interface{}) {
 
 	for _, method := range c.Methods {
 		r.resolveStmt(method)
+		// methods are used by default to avoid errors
+		// related to declared but not used variables
+		r.use(method.Name.Lexeme)
 	}
 
 	r.endScope()
