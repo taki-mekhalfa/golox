@@ -133,6 +133,19 @@ func (p PrettyPrinter) VisitReturn(r *Return) interface{} {
 	return "return " + p.PrintExpr(r.Value)
 }
 
+func (p PrettyPrinter) VisitClass(c *Class) interface{} {
+	var builder strings.Builder
+	builder.WriteString("class ")
+	builder.WriteString(c.Name.Lexeme)
+	builder.WriteString(" {\n")
+	for _, method := range c.Methods {
+		builder.WriteString(p.PrintStmt(method))
+		builder.WriteString("\n")
+	}
+	builder.WriteString("} ")
+	return builder.String()
+}
+
 func (p PrettyPrinter) PrintExpr(expr Expr) string {
 	return expr.Accept(p).(string)
 }
