@@ -79,3 +79,12 @@ type Return struct {
 func (r *Return) Accept(v VisitorStmt) interface{} {
 	return v.VisitReturn(r)
 }
+
+type Class struct {
+	Name    token.Token
+	Methods []*Function
+}
+
+func (c *Class) Accept(v VisitorStmt) interface{} {
+	return v.VisitClass(c)
+}
