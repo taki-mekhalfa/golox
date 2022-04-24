@@ -69,6 +69,10 @@ func (p PrettyPrinter) VisitSet(s *Set) interface{} {
 	return p.PrintExpr(s.Object) + "." + s.Property.Lexeme + " = " + p.PrintExpr(s.Value)
 }
 
+func (p PrettyPrinter) VisitThis(this *This) interface{} {
+	return "this"
+}
+
 func (p PrettyPrinter) VisitPrint(printStmt *Print) interface{} {
 	return fmt.Sprint("PRINT ", p.PrintExpr(printStmt.Expr))
 }
