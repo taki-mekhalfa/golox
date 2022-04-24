@@ -594,6 +594,9 @@ func (p *Parser) primary() (ast.Expr, error) {
 	if p.match(token.TRUE) {
 		return &ast.Literal{Value: true}, nil
 	}
+	if p.peek().Type == token.THIS {
+		return &ast.This{Keyword: p.next()}, nil
+	}
 	if p.peek().Type == token.IDENTIFIER {
 		return &ast.Var{Token: p.next()}, nil
 	}

@@ -14,10 +14,16 @@ func main() {
 	}}
 
 	src := `
-		class Bagel {}
-		var bagel = Bagel();
-		print bagel.name;
-		bagel.age().name().home.address = 5;
+		class Cake {
+			taste() {
+			var adjective = "delicious";
+			print "The " + this.flavor + " cake is " + adjective + "!";
+			}
+		}
+	  
+		var cake = Cake();
+		cake.flavor = "German chocolate";
+		cake.taste(); // Prints "The German chocolate cake is delicious!".
 	`
 
 	scanner.Init(src)
