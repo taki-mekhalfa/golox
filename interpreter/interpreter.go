@@ -31,7 +31,11 @@ func (i *Interpreter) Init() {
 }
 
 func (i *Interpreter) VisitClass(c *Class) interface{} {
-	i.env.define(c.Name.Lexeme, &class{name: c.Name.Lexeme})
+	class := newClass(c.Name.Lexeme)
+	i.env.define(c.Name.Lexeme, class)
+	for _, method := range c.Methods {
+		class.methods[method.Name.Lexeme] = &function{declaration: method, closure: i.env}
+	}
 	return nil
 }
 

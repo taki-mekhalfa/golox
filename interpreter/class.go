@@ -7,7 +7,12 @@ import (
 )
 
 type class struct {
-	name string
+	name    string
+	methods map[string]*function
+}
+
+func newClass(name string) *class {
+	return &class{name: name, methods: make(map[string]*function)}
 }
 
 // String implements fmt.Stringer
@@ -35,11 +40,14 @@ func (ins *instance) String() string {
 }
 
 func (ins *instance) get(t token.Token) interface{} {
-	propery, ok := ins.properties[t.Lexeme]
-	if ok {
-		return propery
+	// properties shadow methods.
+	// this is a subtle but important semantic point
+	if property, ok := ins.properties[t.Lexeme]; ok {
+		return property
 	}
-
+	if method, ok := ins.klass.methods[t.Lexeme]; ok {
+		return method
+	}
 	panic(runtimeError{
 		token: t,
 		msg:   fmt.Sprintf("Undefined property '%s'.", t.Lexeme),
