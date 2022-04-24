@@ -9,6 +9,8 @@ type VisitorExpr interface {
 	VisitAssign(*Assign) interface{}
 	VisitLogical(*Logical) interface{}
 	VisitCall(*Call) interface{}
+	VisitGet(*Get) interface{}
+	VisitSet(*Set) interface{}
 }
 
 type VisitorStmt interface {

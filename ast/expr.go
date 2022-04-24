@@ -77,3 +77,22 @@ type Call struct {
 func (c *Call) Accept(v VisitorExpr) interface{} {
 	return v.VisitCall(c)
 }
+
+type Get struct {
+	Object   Expr
+	Property token.Token
+}
+
+func (g *Get) Accept(v VisitorExpr) interface{} {
+	return v.VisitGet(g)
+}
+
+type Set struct {
+	Object   Expr
+	Property token.Token
+	Value    Expr
+}
+
+func (s *Set) Accept(v VisitorExpr) interface{} {
+	return v.VisitSet(s)
+}
