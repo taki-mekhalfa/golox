@@ -40,6 +40,8 @@ func (p *Parser) declaration() (ast.Stmt, error) {
 		stmt, err = p.var_()
 	case p.match(token.FUN):
 		stmt, err = p.function()
+	case p.match(token.CLASS):
+		stmt, err = p.class()
 	default:
 		stmt, err = p.statement()
 	}
@@ -89,7 +91,32 @@ func (p *Parser) var_() (ast.Stmt, error) {
 	return &ast.VarStmt{Name: varToken.Lexeme, Initializer: initializer, Token: varToken}, nil
 }
 
-func (p *Parser) function() (ast.Stmt, error) {
+func (p *Parser) class() (ast.Stmt, error) {
+	if p.peek().Type != token.IDENTIFIER {
+		p.reportError(p.peek().Line, "Expected class name.")
+		return nil, fmt.Errorf("line %d: expected class name", p.peek().Line)
+	}
+	class := p.next()
+	if !p.match(token.LEFT_BRACE) {
+		p.reportError(p.peek().Line, "Expected { after class name.")
+		return nil, fmt.Errorf("line %d: expected { after class name", p.peek().Line)
+	}
+	var methods []*ast.Function
+	for !p.isAtEnd() && p.peek().Type != token.RIGHT_BRACE {
+		method, err := p.function()
+		if err != nil {
+			return nil, err
+		}
+		methods = append(methods, method)
+	}
+	if !p.match(token.RIGHT_BRACE) {
+		p.reportError(p.peek().Line, "Expected } after class body.")
+		return nil, fmt.Errorf("line %d: expected } after class body", p.peek().Line)
+	}
+	return &ast.Class{Name: class, Methods: methods}, nil
+}
+
+func (p *Parser) function() (*ast.Function, error) {
 	if p.peek().Type != token.IDENTIFIER {
 		p.reportError(p.peek().Line, "Expected function name.")
 		return nil, fmt.Errorf("line %d: expected function name", p.peek().Line)

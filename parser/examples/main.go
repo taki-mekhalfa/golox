@@ -14,13 +14,15 @@ func main() {
 	}}
 
 	src := `
-		var sum;
-		fun sum(a,b,c){
-			return a + b + c;
+		class Breakfast {
+			cook() {
+				print "Eggs a-fryin'!";
+			}
+			
+			serve(who) {
+				print "Enjoy your breakfast, " + who + ".";
+			}
 		}
-
-		var j = 4;
-		print sum(1,2,j);
 	`
 
 	scanner.Init(src)
