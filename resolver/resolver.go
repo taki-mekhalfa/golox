@@ -29,6 +29,12 @@ func (r *Resolver) Resolve(stmts []Stmt) {
 	}
 }
 
+func (r *Resolver) VisitClass(c *Class) (void interface{}) {
+	r.declare(c.Name.Lexeme, c.Name.Line)
+	r.define(c.Name.Lexeme)
+	return
+}
+
 func (r *Resolver) VisitBlock(b *Block) (void interface{}) {
 	r.beginScope()
 	for _, stmt := range b.Content {
