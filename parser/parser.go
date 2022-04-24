@@ -376,6 +376,8 @@ func (p *Parser) assignment() (ast.Expr, error) {
 		}
 		if var_, ok := expr.(*ast.Var); ok {
 			return &ast.Assign{Identifier: var_.Token, Value: value}, nil
+		} else if get, ok := expr.(*ast.Get); ok {
+			return &ast.Set{Object: get.Object, Property: get.Property, Value: value}, nil
 		} else {
 			p.reportError(equal.Line, "Invalid assignment target.")
 		}
@@ -538,6 +540,14 @@ func (p *Parser) call() (ast.Expr, error) {
 		return nil, err
 	}
 	for {
+		if p.match(token.DOT) {
+			if p.peek().Type != token.IDENTIFIER {
+				p.reportError(p.peek().Line, "Expected property name after '.' .")
+				return nil, fmt.Errorf("line %d: expected property name after '.' .", p.peek().Line)
+			}
+			expr = &ast.Get{Object: expr, Property: p.next()}
+			continue
+		}
 		// if we don't encounter a '(', we should break
 		if !p.match(token.LEFT_PAREN) {
 			break

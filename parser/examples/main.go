@@ -14,15 +14,10 @@ func main() {
 	}}
 
 	src := `
-		class Breakfast {
-			cook() {
-				print "Eggs a-fryin'!";
-			}
-			
-			serve(who) {
-				print "Enjoy your breakfast, " + who + ".";
-			}
-		}
+		class Bagel {}
+		var bagel = Bagel();
+		print bagel.name;
+		bagel.age().name().home.address = 5;
 	`
 
 	scanner.Init(src)
