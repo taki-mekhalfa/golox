@@ -96,3 +96,11 @@ type Set struct {
 func (s *Set) Accept(v VisitorExpr) interface{} {
 	return v.VisitSet(s)
 }
+
+type This struct {
+	Keyword token.Token
+}
+
+func (this *This) Accept(v VisitorExpr) interface{} {
+	return v.VisitThis(this)
+}

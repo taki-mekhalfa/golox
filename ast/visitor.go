@@ -11,6 +11,7 @@ type VisitorExpr interface {
 	VisitCall(*Call) interface{}
 	VisitGet(*Get) interface{}
 	VisitSet(*Set) interface{}
+	VisitThis(*This) interface{}
 }
 
 type VisitorStmt interface {
