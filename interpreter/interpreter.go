@@ -65,6 +65,18 @@ func (i *Interpreter) VisitSet(s *Set) interface{} {
 	return nil
 }
 
+func (i *Interpreter) VisitThis(this *This) interface{} {
+	// lookup 'this' just like a var
+	v, defined := i.lookUp(this, this.Keyword.Lexeme)
+	if !defined {
+		panic(runtimeError{
+			token: this.Keyword,
+			msg:   fmt.Sprintf("'this' is undefined (this should not happen)."),
+		})
+	}
+	return v
+}
+
 func (i *Interpreter) VisitWhile(while *While) interface{} {
 	for truthness(i.evaluateExpr(while.Condition)) {
 		i.evaluateStmt(while.Body)
