@@ -35,6 +35,32 @@ func (i *Interpreter) VisitClass(c *Class) interface{} {
 	return nil
 }
 
+func (i *Interpreter) VisitGet(g *Get) interface{} {
+	accessed := i.evaluateExpr(g.Object)
+	object, ok := accessed.(*instance)
+	if !ok {
+		panic(runtimeError{
+			token: g.Property,
+			msg:   fmt.Sprintf("Only instances have properties"),
+		})
+	}
+
+	return object.get(g.Property)
+}
+
+func (i *Interpreter) VisitSet(s *Set) interface{} {
+	accessed := i.evaluateExpr(s.Object)
+	object, ok := accessed.(*instance)
+	if !ok {
+		panic(runtimeError{
+			token: s.Property,
+			msg:   fmt.Sprintf("Only instances have fields"),
+		})
+	}
+	object.set(s.Property, i.evaluateExpr(s.Value))
+	return nil
+}
+
 func (i *Interpreter) VisitWhile(while *While) interface{} {
 	for truthness(i.evaluateExpr(while.Condition)) {
 		i.evaluateStmt(while.Body)
