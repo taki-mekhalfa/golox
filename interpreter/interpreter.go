@@ -30,6 +30,11 @@ func (i *Interpreter) Init() {
 	i.scopeDists = make(map[Expr]int)
 }
 
+func (i *Interpreter) VisitClass(c *Class) interface{} {
+	i.env.define(c.Name.Lexeme, &class{name: c.Name.Lexeme})
+	return nil
+}
+
 func (i *Interpreter) VisitWhile(while *While) interface{} {
 	for truthness(i.evaluateExpr(while.Condition)) {
 		i.evaluateStmt(while.Body)
