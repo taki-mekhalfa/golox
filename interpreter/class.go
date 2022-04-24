@@ -46,6 +46,8 @@ func (ins *instance) get(t token.Token) interface{} {
 		return property
 	}
 	if method, ok := ins.klass.methods[t.Lexeme]; ok {
+		method := &function{declaration: method.declaration, closure: newEnvironment(method.closure)}
+		method.closure.define("this", ins)
 		return method
 	}
 	panic(runtimeError{
