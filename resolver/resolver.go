@@ -29,6 +29,21 @@ func (r *Resolver) Resolve(stmts []Stmt) {
 	}
 }
 
+func (r *Resolver) VisitGet(g *Get) (void interface{}) {
+	// we don't resolve the property name as it's dynamically looked up,
+	// resolve only the object expression.
+	r.resolveExpr(g.Object)
+	return
+}
+
+func (r *Resolver) VisitSet(s *Set) (void interface{}) {
+	// we don't resolve the property name as it's dynamically looked up,
+	// resolve only the object expression.
+	r.resolveExpr(s.Value)
+	r.resolveExpr(s.Object)
+	return
+}
+
 func (r *Resolver) VisitClass(c *Class) (void interface{}) {
 	r.declare(c.Name.Lexeme, c.Name.Line)
 	r.define(c.Name.Lexeme)
