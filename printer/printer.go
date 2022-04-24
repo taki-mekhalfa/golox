@@ -61,6 +61,14 @@ func (p PrettyPrinter) VisitUnary(u *Unary) interface{} {
 	return p.parenthesize(u.Operator.Lexeme, u.Expr)
 }
 
+func (p PrettyPrinter) VisitGet(g *Get) interface{} {
+	return p.PrintExpr(g.Object) + "." + g.Property.Lexeme
+}
+
+func (p PrettyPrinter) VisitSet(s *Set) interface{} {
+	return p.PrintExpr(s.Object) + "." + s.Property.Lexeme + " = " + p.PrintExpr(s.Value)
+}
+
 func (p PrettyPrinter) VisitPrint(printStmt *Print) interface{} {
 	return fmt.Sprint("PRINT ", p.PrintExpr(printStmt.Expr))
 }
