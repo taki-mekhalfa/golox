@@ -47,9 +47,19 @@ func (r *Resolver) VisitSet(s *Set) (void interface{}) {
 func (r *Resolver) VisitClass(c *Class) (void interface{}) {
 	r.declare(c.Name.Lexeme, c.Name.Line)
 	r.define(c.Name.Lexeme)
+	r.beginScope()
+
+	r.declare("this", c.Name.Line)
+	r.define("this")
+	// "this" is used by default to avoid errors
+	// related to declared but not used variables
+	r.use("this")
+
 	for _, method := range c.Methods {
 		r.resolveStmt(method)
 	}
+
+	r.endScope()
 	return
 }
 
@@ -171,6 +181,11 @@ func (r *Resolver) VisitLogical(l *Logical) (void interface{}) {
 
 func (r *Resolver) VisitUnary(u *Unary) (void interface{}) {
 	r.resolveExpr(u.Expr)
+	return
+}
+
+func (r *Resolver) VisitThis(this *This) (void interface{}) {
+	r.resolve(this, "this")
 	return
 }
 
