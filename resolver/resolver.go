@@ -47,6 +47,9 @@ func (r *Resolver) VisitSet(s *Set) (void interface{}) {
 func (r *Resolver) VisitClass(c *Class) (void interface{}) {
 	r.declare(c.Name.Lexeme, c.Name.Line)
 	r.define(c.Name.Lexeme)
+	for _, method := range c.Methods {
+		r.resolveStmt(method)
+	}
 	return
 }
 
