@@ -7,6 +7,10 @@ import (
 	"github.com/taki-mekhalfa/golox/interpreter"
 )
 
+const (
+	init_ = "init"
+)
+
 type meta struct {
 	defined bool
 	used    bool
@@ -20,8 +24,8 @@ type Resolver struct {
 	scopes []map[string]*meta
 	Interp *interpreter.Interpreter
 
-	insideFunction bool
-	insideClass    bool
+	funcCtx     functionCtx
+	insideClass bool
 }
 
 func (r *Resolver) Resolve(stmts []Stmt) {
@@ -61,7 +65,15 @@ func (r *Resolver) VisitClass(c *Class) (void interface{}) {
 	r.use("this")
 
 	for _, method := range c.Methods {
-		r.resolveStmt(method)
+		enclosingFuncCtx := r.funcCtx
+		if method.Name.Lexeme == init_ {
+			r.funcCtx = initializer
+		} else {
+			r.funcCtx = function
+		}
+		r.reslveFunction(method)
+		r.funcCtx = enclosingFuncCtx
+
 		// methods are used by default to avoid errors
 		// related to declared but not used variables
 		r.use(method.Name.Lexeme)
@@ -106,21 +118,28 @@ func (r *Resolver) VisitAssign(a *Assign) (void interface{}) {
 	return
 }
 
-func (r *Resolver) VisitFunction(f *Function) (void interface{}) {
+func (r *Resolver) reslveFunction(f *Function) {
 	r.declare(f.Name.Lexeme, f.Name.Line)
 	r.define(f.Name.Lexeme)
 
-	enclosedInFunction := r.insideFunction
-	r.insideFunction = true
 	r.beginScope()
 	for _, param := range f.Params {
+		r.declare(param.Lexeme, f.Name.Line)
 		r.define(param.Lexeme)
 	}
 	for _, stmt := range f.Body {
 		r.resolveStmt(stmt)
 	}
 	r.endScope()
-	r.insideFunction = enclosedInFunction
+}
+
+func (r *Resolver) VisitFunction(f *Function) (void interface{}) {
+	enclosingFuncCtx := r.funcCtx
+	r.funcCtx = function
+
+	r.reslveFunction(f)
+
+	r.funcCtx = enclosingFuncCtx
 	return
 }
 
@@ -144,10 +163,18 @@ func (r *Resolver) VisitPrint(p *Print) (void interface{}) {
 }
 
 func (r *Resolver) VisitReturn(ret_ *Return) (void interface{}) {
-	if !r.insideFunction {
+	switch r.funcCtx {
+	case initializer:
+		if ret_.Value != nil {
+			r.reportError(ret_.Token.Line, "Can't return a value from class initializer.")
+			return
+		}
+	case function:
 		r.reportError(ret_.Token.Line, "Can't return from top-level code.")
 		return
+	default:
 	}
+
 	if ret_.Value != nil {
 		r.resolveExpr(ret_.Value)
 	}
