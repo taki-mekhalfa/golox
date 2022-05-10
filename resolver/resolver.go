@@ -21,6 +21,7 @@ type Resolver struct {
 	Interp *interpreter.Interpreter
 
 	insideFunction bool
+	insideClass    bool
 }
 
 func (r *Resolver) Resolve(stmts []Stmt) {
@@ -47,7 +48,11 @@ func (r *Resolver) VisitSet(s *Set) (void interface{}) {
 func (r *Resolver) VisitClass(c *Class) (void interface{}) {
 	r.declare(c.Name.Lexeme, c.Name.Line)
 	r.define(c.Name.Lexeme)
+
 	r.beginScope()
+
+	enclosedInClass := r.insideClass
+	r.insideClass = true
 
 	r.declare("this", c.Name.Line)
 	r.define("this")
@@ -63,6 +68,8 @@ func (r *Resolver) VisitClass(c *Class) (void interface{}) {
 	}
 
 	r.endScope()
+
+	r.insideClass = enclosedInClass
 	return
 }
 
@@ -188,6 +195,10 @@ func (r *Resolver) VisitUnary(u *Unary) (void interface{}) {
 }
 
 func (r *Resolver) VisitThis(this *This) (void interface{}) {
+	if !r.insideClass {
+		r.reportError(this.Keyword.Line, "Can't use 'this' outside of a class.")
+		return
+	}
 	r.resolve(this, "this")
 	return
 }
